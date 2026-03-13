@@ -183,8 +183,7 @@ export default function Hero() {
       >
         <div
           className="w-px animate-scroll-pulse"
-            style={{ height: '50px' }}
-          style={{ background: 'linear-gradient(to bottom, transparent, var(--gold))' }}
+          style={{ height: '50px', background: 'linear-gradient(to bottom, transparent, var(--gold))' }}
         />
         <span
           className="text-[9px] tracking-[0.25em] uppercase text-gold/60"
