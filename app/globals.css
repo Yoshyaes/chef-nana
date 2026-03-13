@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gold: #C9973A;
+  --gold-light: #E2B96A;
+  --gold-pale: #F5E6C8;
+  --terracotta: #B85A35;
+  --terracotta-deep: #8C3F22;
+  --green: #2D5F3D;
+  --green-light: #4A7A58;
+  --cream: #F7F1E8;
+  --cream-dark: #EDE4D4;
+  --brown: #2C1A0E;
+  --brown-mid: #5C3A22;
+  --white: #FEFCF8;
+  --text: #1E1008;
 }
 
+/* ─── Tailwind v4 Theme Registration ───────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-pale: var(--gold-pale);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-deep: var(--terracotta-deep);
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+  --color-cream: var(--cream);
+  --color-cream-dark: var(--cream-dark);
+  --color-brown: var(--brown);
+  --color-brown-mid: var(--brown-mid);
+  --color-site-white: var(--white);
+  --color-site-text: var(--text);
+
+  --font-cormorant: var(--font-cormorant);
+  --font-jost: var(--font-jost);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base Reset ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-jost), 'Jost', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
 }
+
+/* ─── Keyframe Animations ───────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+/* ─── Utility Classes ───────────────────────────────────────── */
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+.animate-scroll-pulse {
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+/* ─── Tri-Color Gradient (Kente-inspired) ───────────────────── */
+.gradient-kente {
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--terracotta) 33%,
+    var(--green) 66%,
+    var(--gold) 100%
+  );
+}
+
+.gradient-kente-vertical {
+  background: linear-gradient(
+    to bottom,
+    var(--gold) 0%,
+    var(--terracotta) 25%,
+    var(--green) 50%,
+    var(--gold) 75%,
+    var(--terracotta) 100%
+  );
+}
+
+/* ─── Diagonal Geo Pattern ──────────────────────────────────── */
+.geo-diagonal {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 8px,
+    rgba(201, 151, 58, 0.04) 8px,
+    rgba(201, 151, 58, 0.04) 16px
+  );
+}
+
+/* ─── Grid Geo Pattern ──────────────────────────────────────── */
+.geo-grid {
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(201, 151, 58, 0.06) 40px, rgba(201, 151, 58, 0.06) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(201, 151, 58, 0.06) 40px, rgba(201, 151, 58, 0.06) 41px);
+}
+
+/* ─── Form Inputs ───────────────────────────────────────────── */
+.form-field {
+  background: transparent;
+  border: 1px solid rgba(44, 26, 14, 0.2);
+  padding: 14px 18px;
+  font-family: var(--font-jost), 'Jost', sans-serif;
+  font-size: 14px;
+  color: var(--brown);
+  outline: none;
+  transition: border-color 0.25s;
+  width: 100%;
+}
+
+.form-field:focus {
+  border-color: var(--gold);
+}
+
+.form-field::placeholder {
+  color: rgba(92, 58, 34, 0.4);
+}
+
+/* ─── Gallery Mosaic Grid ───────────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 240px;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .gallery-grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: 420px 300px;
+    grid-auto-rows: unset;
+  }
+  /* First cell spans both rows — tall portrait */
+  .gallery-grid > *:first-child {
+    grid-row: 1 / 3;
+  }
+}
+
+/* ─── Footer Grid ────────────────────────────────────────────── */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+@media (min-width: 640px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+  }
+}
+
+/* ─── Gallery Gradient Placeholders ────────────────────────── */
+.g1 { background: linear-gradient(135deg, #8B4A12 0%, #3A1F05 40%, #1E2D12 100%); }
+.g2 { background: linear-gradient(160deg, #C06428 0%, #6B3215 50%, #2A1A08 100%); }
+.g3 { background: linear-gradient(120deg, #4A7A35 0%, #1E3D14 50%, #3B2510 100%); }
+.g4 { background: linear-gradient(145deg, #7A4A20 0%, #3A2008 30%, #1A3020 70%, #0A1D10 100%); }
+.g5 { background: linear-gradient(135deg, #9B5520 0%, #5A2A08 40%, #2A1A05 100%); }
+.g6 { background: linear-gradient(160deg, #2D5F3D 0%, #162B1C 50%, #3B2010 100%); }
