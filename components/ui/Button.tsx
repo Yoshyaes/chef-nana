@@ -22,7 +22,7 @@ export default function Button({
   className = '',
 }: ButtonProps) {
   const base =
-    'inline-block font-jost text-[12px] font-semibold tracking-[0.18em] uppercase px-9 py-4 transition-all duration-200 cursor-pointer border-0 hover:-translate-y-0.5'
+    'inline-block font-jost text-[12px] font-semibold tracking-[0.18em] uppercase px-6 py-3.5 sm:px-9 sm:py-4 transition-all duration-200 cursor-pointer border-0 hover:-translate-y-0.5'
 
   const variants: Record<string, string> = {
     primary: 'bg-gold text-brown hover:bg-gold-light',

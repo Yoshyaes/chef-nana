@@ -93,7 +93,7 @@ export default function Booking() {
       {/* Ghost SAVOR text */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-cormorant font-semibold whitespace-nowrap pointer-events-none select-none leading-none"
-        style={{ fontSize: '200px', color: 'rgba(201,151,58,0.04)' }}
+        style={{ fontSize: 'clamp(80px, 20vw, 200px)', color: 'rgba(201,151,58,0.04)' }}
         aria-hidden
       >
         SAVOR
@@ -160,7 +160,7 @@ export default function Booking() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-5">
                 {/* First Name */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     First Name <span className="text-terracotta">*</span>
                   </label>
                   <input
@@ -176,7 +176,7 @@ export default function Booking() {
 
                 {/* Last Name */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Last Name <span className="text-terracotta">*</span>
                   </label>
                   <input
@@ -192,7 +192,7 @@ export default function Booking() {
 
                 {/* Email */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Email <span className="text-terracotta">*</span>
                   </label>
                   <input
@@ -208,7 +208,7 @@ export default function Booking() {
 
                 {/* Phone */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Phone
                   </label>
                   <input
@@ -223,7 +223,7 @@ export default function Booking() {
 
                 {/* Event Type */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Event Type <span className="text-terracotta">*</span>
                   </label>
                   <select
@@ -246,7 +246,7 @@ export default function Booking() {
 
                 {/* Event Date */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Event Date
                   </label>
                   <input
@@ -260,7 +260,7 @@ export default function Booking() {
 
                 {/* Guest Count */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Guest Count
                   </label>
                   <input
@@ -276,7 +276,7 @@ export default function Booking() {
 
                 {/* Location */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Location / City
                   </label>
                   <input
@@ -290,8 +290,8 @@ export default function Booking() {
                 </div>
 
                 {/* Vision — full width */}
-                <div className="flex flex-col gap-2 col-span-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
+                <div className="flex flex-col gap-2 col-span-1 sm:col-span-2">
+                  <label className="text-[11px] tracking-[0.2em] uppercase text-brown-mid font-semibold">
                     Tell Nana About Your Vision
                   </label>
                   <textarea
@@ -315,7 +315,7 @@ export default function Booking() {
                   type="submit"
                   disabled={status === 'loading'}
                   className="bg-gold text-brown border-0 font-jost text-[13px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-200 hover:bg-gold-light hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
-                  style={{ paddingLeft: '60px', paddingRight: '60px', paddingTop: '18px', paddingBottom: '18px' }}
+                  style={{ paddingLeft: 'clamp(32px, 6vw, 60px)', paddingRight: 'clamp(32px, 6vw, 60px)', paddingTop: '18px', paddingBottom: '18px' }}
                 >
                   {status === 'loading' ? 'Sending…' : 'Send Inquiry'}
                 </button>

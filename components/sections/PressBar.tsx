@@ -15,7 +15,7 @@ export default function PressBar() {
 
   return (
     <div className="bg-brown overflow-hidden" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
-      <div className="whitespace-nowrap animate-marquee" style={{ display: 'flex', gap: '60px' }}>
+      <div className="whitespace-nowrap animate-marquee" style={{ display: 'flex', gap: 'clamp(24px, 5vw, 60px)' }}>
         {items.map((name, i) => (
           <span
             key={i}
@@ -24,7 +24,7 @@ export default function PressBar() {
           >
             {name}
             {i < items.length - 1 && (
-              <span style={{ margin: '0 30px', color: 'var(--gold)' }} aria-hidden>
+              <span style={{ margin: '0 clamp(10px, 2.5vw, 30px)', color: 'var(--gold)' }} aria-hidden>
                 ✦
               </span>
             )}

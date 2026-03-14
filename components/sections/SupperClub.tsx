@@ -74,7 +74,7 @@ export default function SupperClub() {
             ].map(({ label, bg }) => (
               <div
                 key={label}
-                className={`${bg} text-cream text-[10px] tracking-[0.2em] uppercase px-5 py-2.5`}
+                className={`${bg} text-cream text-[11px] tracking-[0.2em] uppercase px-5 py-2.5`}
               >
                 {label}
               </div>
@@ -99,7 +99,7 @@ export default function SupperClub() {
       </div>
 
       {/* Visual — right */}
-      <div className="relative overflow-hidden" style={{ background: 'var(--green)' }}>
+      <div className="relative overflow-hidden min-h-[420px] lg:min-h-0" style={{ background: 'var(--green)' }}>
         {/* Gradient bg */}
         <div
           className="absolute inset-0"
@@ -115,7 +115,7 @@ export default function SupperClub() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
           <div
             className="rounded-full border border-gold/35 flex flex-col items-center justify-center gap-1 relative"
-            style={{ width: '200px', height: '200px' }}
+            style={{ width: 'clamp(140px, 25vw, 200px)', height: 'clamp(140px, 25vw, 200px)' }}
           >
             {/* Inner ring */}
             <div className="absolute inset-3 rounded-full border border-gold/20" />
@@ -135,7 +135,7 @@ export default function SupperClub() {
         {/* Event cards — bottom */}
         <div
           className="absolute left-0 right-0"
-          style={{ bottom: '60px', paddingLeft: '40px', paddingRight: '40px' }}
+          style={{ bottom: 'clamp(24px, 4vw, 60px)', paddingLeft: 'clamp(16px, 3vw, 40px)', paddingRight: 'clamp(16px, 3vw, 40px)' }}
         >
           {events.map((event) => (
             <EventCard key={event.date} {...event} />

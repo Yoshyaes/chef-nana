@@ -43,12 +43,12 @@ export default function About() {
         {/* Quote */}
         <div
           className="absolute left-0 right-0 text-center"
-          style={{ bottom: '70px', paddingLeft: '48px', paddingRight: '48px' }}
+          style={{ bottom: 'clamp(32px, 5vw, 70px)', paddingLeft: 'clamp(20px, 4vw, 48px)', paddingRight: 'clamp(20px, 4vw, 48px)' }}
         >
           <p className="font-cormorant text-[24px] italic text-gold-pale leading-[1.5]">
             &ldquo;I always do it for the culture.&rdquo;
           </p>
-          <p className="mt-3 text-[10px] tracking-[0.2em] uppercase text-gold/60">
+          <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-gold/60">
             &mdash; Chef Nana Araba Wilmot
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function About() {
         </FadeIn>
 
         <FadeIn delay={0.3}>
-          <div className="grid grid-cols-2 gap-5 mt-9 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-9 mb-12">
             {credentials.map((cred) => (
               <CredentialCard key={cred.year} year={cred.year} name={cred.name} />
             ))}

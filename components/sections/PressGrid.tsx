@@ -67,7 +67,7 @@ export default function PressGrid() {
           <SectionLabel color="gold" center>
             As Seen In
           </SectionLabel>
-          <h2 className="font-cormorant text-[52px] font-light text-cream mt-4">
+          <h2 className="font-cormorant font-light text-cream mt-4" style={{ fontSize: 'clamp(36px, 5vw, 52px)' }}>
             Press &amp; Recognition
           </h2>
         </div>
@@ -86,7 +86,7 @@ export default function PressGrid() {
               target="_blank"
               rel="noopener noreferrer"
               className="group border border-gold/10 flex items-center justify-center transition-colors duration-300 hover:bg-gold/[0.06] no-underline"
-              style={{ paddingLeft: '48px', paddingRight: '48px', paddingTop: '28px', paddingBottom: '28px' }}
+              style={{ paddingLeft: 'clamp(20px, 4vw, 48px)', paddingRight: 'clamp(20px, 4vw, 48px)', paddingTop: '28px', paddingBottom: '28px' }}
             >
               <span className="font-cormorant text-[22px] italic tracking-[0.08em] text-cream/35 font-normal whitespace-nowrap transition-colors duration-300 group-hover:text-gold/70">
                 {pub.name}

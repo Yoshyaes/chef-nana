@@ -51,7 +51,7 @@ export default function Gallery() {
         <div className="flex justify-between items-end" style={{ marginBottom: '40px' }}>
           <div>
             <SectionLabel color="terracotta">Portfolio</SectionLabel>
-            <h2 className="font-cormorant text-[52px] font-light text-brown leading-none">
+            <h2 className="font-cormorant font-light text-brown leading-none" style={{ fontSize: 'clamp(36px, 5vw, 52px)' }}>
               The <em className="italic text-terracotta">work</em>
             </h2>
           </div>

@@ -17,7 +17,7 @@ export default function Hero() {
   return (
     <section
       className="relative min-h-screen flex items-end overflow-hidden"
-      style={{ minHeight: '700px' }}
+      style={{ minHeight: 'min(700px, 100svh)' }}
     >
       {/* Background */}
       <div
@@ -157,7 +157,7 @@ export default function Hero() {
           {['New York', 'Philadelphia', 'Accra'].map((city) => (
             <div
               key={city}
-              className="text-[10px] tracking-[0.2em] uppercase text-gold/70 border border-gold/25 px-3.5 py-1.5"
+              className="text-[11px] tracking-[0.2em] uppercase text-gold/70 border border-gold/25 px-3.5 py-1.5"
             >
               {city}
             </div>
@@ -178,8 +178,8 @@ export default function Hero() {
       {/* Scroll Indicator */}
       <motion.div
         {...fadeUp(1.1)}
-        className="absolute bottom-9 flex flex-col items-center gap-2"
-        style={{ right: '60px' }}
+        className="absolute bottom-9 hidden sm:flex flex-col items-center gap-2"
+        style={{ right: 'clamp(16px, 4vw, 60px)' }}
       >
         <div
           className="w-px animate-scroll-pulse"

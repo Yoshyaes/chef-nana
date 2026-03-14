@@ -25,10 +25,10 @@ export default function ServiceCard({
       className="relative cursor-pointer border border-gold/[0.08] h-full flex flex-col"
       style={{
         background: 'rgba(255,255,255,0.03)',
-        paddingTop: '48px',
-        paddingBottom: '48px',
-        paddingLeft: '44px',
-        paddingRight: '44px',
+        paddingTop: 'clamp(32px, 4vw, 48px)',
+        paddingBottom: 'clamp(32px, 4vw, 48px)',
+        paddingLeft: 'clamp(24px, 3.5vw, 44px)',
+        paddingRight: 'clamp(24px, 3.5vw, 44px)',
       }}
     >
       <div className="font-cormorant text-[72px] font-light text-gold/10 leading-none mb-5">
