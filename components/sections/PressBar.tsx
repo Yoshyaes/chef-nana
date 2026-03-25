@@ -11,15 +11,20 @@ const PUBLICATIONS = [
 
 function MarqueeGroup() {
   return (
-    <div className="flex shrink-0" style={{ gap: 'clamp(24px, 5vw, 60px)' }}>
+    <div className="flex items-center shrink-0">
       {PUBLICATIONS.map((name, i) => (
-        <span
-          key={i}
-          className="font-cormorant text-[13px] italic tracking-[0.12em] shrink-0"
-          style={{ color: 'rgba(201,151,58,0.55)' }}
-        >
-          {name}
-          <span style={{ margin: '0 clamp(10px, 2.5vw, 30px)', color: 'var(--gold)' }} aria-hidden>
+        <span key={i} className="flex items-center shrink-0">
+          <span
+            className="font-cormorant text-[13px] italic tracking-[0.12em]"
+            style={{ color: 'rgba(201,151,58,0.55)' }}
+          >
+            {name}
+          </span>
+          <span
+            className="text-[8px] leading-none"
+            style={{ margin: '0 clamp(16px, 3vw, 40px)', color: 'var(--gold)' }}
+            aria-hidden
+          >
             ✦
           </span>
         </span>
