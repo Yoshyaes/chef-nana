@@ -9,27 +9,31 @@ const PUBLICATIONS = [
   'Philadelphia Museum of Art',
 ]
 
-export default function PressBar() {
-  // Double the array for seamless infinite loop
-  const items = [...PUBLICATIONS, ...PUBLICATIONS]
+function MarqueeGroup() {
+  return (
+    <div className="flex shrink-0" style={{ gap: 'clamp(24px, 5vw, 60px)' }}>
+      {PUBLICATIONS.map((name, i) => (
+        <span
+          key={i}
+          className="font-cormorant text-[13px] italic tracking-[0.12em] shrink-0"
+          style={{ color: 'rgba(201,151,58,0.55)' }}
+        >
+          {name}
+          <span style={{ margin: '0 clamp(10px, 2.5vw, 30px)', color: 'var(--gold)' }} aria-hidden>
+            ✦
+          </span>
+        </span>
+      ))}
+    </div>
+  )
+}
 
+export default function PressBar() {
   return (
     <div className="bg-brown overflow-hidden" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
-      <div className="whitespace-nowrap animate-marquee" style={{ display: 'flex', gap: 'clamp(24px, 5vw, 60px)' }}>
-        {items.map((name, i) => (
-          <span
-            key={i}
-            className="font-cormorant text-[13px] italic tracking-[0.12em] shrink-0"
-            style={{ color: 'rgba(201,151,58,0.55)' }}
-          >
-            {name}
-            {i < items.length - 1 && (
-              <span style={{ margin: '0 clamp(10px, 2.5vw, 30px)', color: 'var(--gold)' }} aria-hidden>
-                ✦
-              </span>
-            )}
-          </span>
-        ))}
+      <div className="flex animate-marquee whitespace-nowrap">
+        <MarqueeGroup />
+        <MarqueeGroup />
       </div>
     </div>
   )
