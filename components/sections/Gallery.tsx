@@ -30,7 +30,7 @@ const cells: GalleryCell[] = [
   },
   {
     caption: 'Green Kontomire · Accra Residency',
-    gradient: 'g3',
+    image: { src: '/images/e79569e6-f79a-4707-91ef-5fa8d0b54648.avif', alt: 'Green Kontomire dish', position: 'object-center' },
   },
 ]
 

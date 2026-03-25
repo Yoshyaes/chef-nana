@@ -18,12 +18,12 @@ export default function EventCard({ date, location, title, price }: EventCardPro
       }}
     >
       <div>
-        <div className="text-[10px] tracking-[0.15em] text-gold uppercase mb-1">
+        <div className="text-[12px] tracking-[0.15em] text-gold uppercase mb-1">
           {date} · {location}
         </div>
-        <div className="font-cormorant text-[16px] text-cream italic">{title}</div>
+        <div className="font-cormorant text-[18px] text-cream italic">{title}</div>
       </div>
-      <div className="text-[13px] font-semibold text-gold-light ml-4 shrink-0">{price}</div>
+      <div className="text-[15px] font-semibold text-gold-light ml-4 shrink-0">{price}</div>
     </div>
   )
 }

@@ -47,7 +47,7 @@ export default function SupperClub() {
         <FadeIn delay={0.1}>
           <h2
             className="font-cormorant font-light text-brown leading-[1.15] mb-6"
-            style={{ fontSize: 'clamp(38px, 4vw, 54px)' }}
+            style={{ fontSize: 'clamp(42px, 5vw, 62px)' }}
           >
             Love That
             <br />I <em className="italic text-green">Knead</em>
@@ -55,12 +55,12 @@ export default function SupperClub() {
         </FadeIn>
 
         <FadeIn delay={0.2}>
-          <p className="text-[16px] leading-[1.85] text-brown-mid font-light mb-7" style={{ maxWidth: '480px' }}>
+          <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-7" style={{ maxWidth: '480px' }}>
             An intimate supper club series celebrating the foodways of West Africa — reimagined
             through a fine-dining lens and served around a communal table. Each dinner is a four
             to five course journey through history, memory, and flavor.
           </p>
-          <p className="text-[16px] leading-[1.85] text-brown-mid font-light mb-9" style={{ maxWidth: '480px' }}>
+          <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-9" style={{ maxWidth: '480px' }}>
             Pairings. Stories. Culture. No two dinners are the same.
           </p>
         </FadeIn>
@@ -74,7 +74,7 @@ export default function SupperClub() {
             ].map(({ label, bg }) => (
               <div
                 key={label}
-                className={`${bg} text-cream text-[11px] tracking-[0.2em] uppercase px-5 py-2.5`}
+                className={`${bg} text-cream text-[12px] tracking-[0.2em] uppercase px-5 py-2.5`}
               >
                 {label}
               </div>
