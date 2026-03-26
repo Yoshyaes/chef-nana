@@ -13,8 +13,8 @@ interface GalleryCell {
 
 const cells: GalleryCell[] = [
   {
-    caption: 'Chef Nana at Work · Private Dinner',
-    image: { src: '/images/nana-portrait.jpg', alt: 'Chef Nana cooking', position: 'object-top' },
+    caption: 'Chef Nana on Chopped',
+    image: { src: '/images/nana-chopped.png', alt: 'Chef Nana on Chopped', position: 'object-top' },
   },
   {
     caption: 'Small Bowls · Love That I Knead',
