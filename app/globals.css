@@ -166,9 +166,14 @@ body {
 .supper-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 280px 280px;
   gap: 6px;
-  height: 100%;
+}
+@media (min-width: 769px) {
+  .supper-grid {
+    grid-template-rows: 1fr 1fr;
+    flex: 1;
+  }
 }
 .supper-grid > *:first-child {
   grid-row: 1 / 3;

@@ -125,11 +125,11 @@ export default function SupperClub() {
         </FadeIn>
       </div>
 
-      {/* Visual — right: Photo mosaic */}
-      <div className="relative overflow-hidden min-h-[480px] lg:min-h-0">
+      {/* Visual — right: Photo mosaic + event cards */}
+      <div className="flex flex-col">
         <div className="supper-grid">
           {images.map((img, i) => (
-            <FadeIn key={img.src} delay={i * 0.15}>
+            <FadeIn key={img.src} delay={i * 0.15} className="h-full">
               <motion.div
                 className="relative overflow-hidden cursor-pointer h-full"
                 whileHover="hover"
@@ -168,17 +168,14 @@ export default function SupperClub() {
           ))}
         </div>
 
-        {/* Event cards — overlay at bottom */}
+        {/* Event cards — below mosaic */}
         <div
-          className="absolute bottom-0 left-0 right-0 z-10"
           style={{
-            background: 'rgba(13, 36, 25, 0.82)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'rgba(13, 36, 25, 0.95)',
             paddingLeft: 'clamp(16px, 3vw, 40px)',
             paddingRight: 'clamp(16px, 3vw, 40px)',
-            paddingTop: 'clamp(12px, 2vw, 20px)',
-            paddingBottom: 'clamp(12px, 2vw, 20px)',
+            paddingTop: 'clamp(16px, 2vw, 24px)',
+            paddingBottom: 'clamp(16px, 2vw, 24px)',
           }}
         >
           {events.map((event) => (
