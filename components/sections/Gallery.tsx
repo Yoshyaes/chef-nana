@@ -14,7 +14,7 @@ interface GalleryCell {
 const cells: GalleryCell[] = [
   {
     caption: 'Chef Nana on Chopped',
-    image: { src: '/images/nana-chopped.png', alt: 'Chef Nana on Chopped', position: 'object-top' },
+    image: { src: '/images/instagram_DBteinZR9xV.jpg', alt: 'Chef Nana on Chopped', position: 'object-top' },
   },
   {
     caption: 'Small Bowls · Love That I Knead',
