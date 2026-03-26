@@ -5,22 +5,24 @@ import Button from '@/components/ui/Button'
 
 const events = [
   {
-    date: 'Apr 12',
-    location: 'Brooklyn, NY',
-    title: 'A West African Spring Table',
-    price: '$125pp',
+    date: 'Apr 11 + 12',
+    location: 'Washington D.C.',
+    title: 'Homecoming: The Taste of Return',
+    price: '$180',
   },
   {
-    date: 'May 3',
+    date: 'Apr 20',
+    title: 'Baldor Bites with Chef Lana',
+  },
+  {
+    date: 'Apr 23 - 25',
+    location: 'Washington D.C.',
+    title: 'Black Women In Food Summit',
+  },
+  {
+    date: 'Apr 26',
     location: 'Philadelphia, PA',
-    title: 'Jollof & Jazz: A Diaspora Dinner',
-    price: '$115pp',
-  },
-  {
-    date: 'Jun 7',
-    location: 'Accra, Ghana',
-    title: 'Back to Roots: A Homecoming Feast',
-    price: '₵850pp',
+    title: 'Meals On Wheels',
   },
 ]
 
@@ -120,11 +122,11 @@ export default function SupperClub() {
             {/* Inner ring */}
             <div className="absolute inset-3 rounded-full border border-gold/20" />
             <div className="font-cormorant text-[13px] tracking-[0.12em] text-gold-light text-center leading-[1.5] relative z-10">
-              Love That
+              Chef Nana Araba
               <br />
-              I Knead
+              Upcoming
               <br />
-              Supper Club
+              Events
             </div>
             <div className="text-[9px] tracking-[0.3em] uppercase text-gold/50 relative z-10">
               EST. 2020

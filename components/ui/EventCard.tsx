@@ -1,8 +1,8 @@
 interface EventCardProps {
   date: string
-  location: string
+  location?: string
   title: string
-  price: string
+  price?: string
 }
 
 export default function EventCard({ date, location, title, price }: EventCardProps) {
@@ -19,11 +19,11 @@ export default function EventCard({ date, location, title, price }: EventCardPro
     >
       <div>
         <div className="text-[12px] tracking-[0.15em] text-gold uppercase mb-1">
-          {date} · {location}
+          {date}{location ? ` · ${location}` : ''}
         </div>
         <div className="font-cormorant text-[18px] text-cream italic">{title}</div>
       </div>
-      <div className="text-[15px] font-semibold text-gold-light ml-4 shrink-0">{price}</div>
+      {price && <div className="text-[15px] font-semibold text-gold-light ml-4 shrink-0">{price}</div>}
     </div>
   )
 }
