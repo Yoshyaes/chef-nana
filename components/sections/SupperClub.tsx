@@ -1,3 +1,7 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import Image from 'next/image'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionLabel from '@/components/ui/SectionLabel'
 import EventCard from '@/components/ui/EventCard'
@@ -23,6 +27,27 @@ const events = [
     date: 'Apr 26',
     location: 'Philadelphia, PA',
     title: 'Meals On Wheels',
+  },
+]
+
+const images = [
+  {
+    src: '/images/Knead/23-11-20-chefnana-39.jpg',
+    alt: 'Guests enjoying a communal candlelit dinner',
+    caption: 'The Communal Table · Supper Club',
+    position: 'object-center',
+  },
+  {
+    src: '/images/Knead/IMG_7018.jpeg',
+    alt: 'Elegant table setting with wine glasses and string lights',
+    caption: 'The Table Awaits · Setting the Scene',
+    position: 'object-center',
+  },
+  {
+    src: '/images/Knead/sc_228__d4a7594.jpeg',
+    alt: 'Lively dinner with guests sharing food and wine',
+    caption: 'A Night to Remember · Gathering',
+    position: 'object-top',
   },
 ]
 
@@ -100,44 +125,61 @@ export default function SupperClub() {
         </FadeIn>
       </div>
 
-      {/* Visual — right */}
-      <div className="relative overflow-hidden min-h-[420px] lg:min-h-0" style={{ background: 'var(--green)' }}>
-        {/* Gradient bg */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, #1A3D28 0%, #0D2419 60%, #2C3A10 100%)',
-          }}
-        />
+      {/* Visual — right: Photo mosaic */}
+      <div className="relative overflow-hidden min-h-[480px] lg:min-h-0">
+        <div className="supper-grid">
+          {images.map((img, i) => (
+            <FadeIn key={img.src} delay={i * 0.15}>
+              <motion.div
+                className="relative overflow-hidden cursor-pointer h-full"
+                whileHover="hover"
+              >
+                <motion.div
+                  className="absolute inset-0"
+                  variants={{ hover: { scale: 1.04 } }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className={`object-cover ${img.position}`}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </motion.div>
 
-        {/* Grid geo overlay */}
-        <div className="absolute inset-0 geo-grid" />
-
-        {/* Center emblem */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-          <div
-            className="rounded-full border border-gold/35 flex flex-col items-center justify-center gap-1 relative"
-            style={{ width: 'clamp(140px, 25vw, 200px)', height: 'clamp(140px, 25vw, 200px)' }}
-          >
-            {/* Inner ring */}
-            <div className="absolute inset-3 rounded-full border border-gold/20" />
-            <div className="font-cormorant text-[13px] tracking-[0.12em] text-gold-light text-center leading-[1.5] relative z-10">
-              Chef Nana Araba
-              <br />
-              Upcoming
-              <br />
-              Events
-            </div>
-            <div className="text-[9px] tracking-[0.3em] uppercase text-gold/50 relative z-10">
-              EST. 2020
-            </div>
-          </div>
+                {/* Caption overlay on hover */}
+                <motion.div
+                  className="absolute inset-0 flex items-end"
+                  style={{
+                    background: 'linear-gradient(to top, rgba(18,8,2,0.75) 0%, transparent 55%)',
+                    padding: '20px',
+                  }}
+                  initial={{ opacity: 0 }}
+                  variants={{ hover: { opacity: 1 } }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="font-cormorant text-[15px] italic text-gold-pale tracking-[0.05em]">
+                    {img.caption}
+                  </p>
+                </motion.div>
+              </motion.div>
+            </FadeIn>
+          ))}
         </div>
 
-        {/* Event cards — bottom */}
+        {/* Event cards — overlay at bottom */}
         <div
-          className="absolute left-0 right-0"
-          style={{ bottom: 'clamp(24px, 4vw, 60px)', paddingLeft: 'clamp(16px, 3vw, 40px)', paddingRight: 'clamp(16px, 3vw, 40px)' }}
+          className="absolute bottom-0 left-0 right-0 z-10"
+          style={{
+            background: 'rgba(13, 36, 25, 0.82)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            paddingLeft: 'clamp(16px, 3vw, 40px)',
+            paddingRight: 'clamp(16px, 3vw, 40px)',
+            paddingTop: 'clamp(12px, 2vw, 20px)',
+            paddingBottom: 'clamp(12px, 2vw, 20px)',
+          }}
         >
           {events.map((event) => (
             <EventCard key={event.date} {...event} />
