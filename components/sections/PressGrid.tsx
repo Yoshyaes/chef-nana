@@ -4,27 +4,23 @@ import SectionLabel from '@/components/ui/SectionLabel'
 const publications = [
   {
     name: 'Bon Appétit',
-    href: 'https://www.bonappetit.com/search?q=Nana+Araba+Wilmot',
+    href: 'https://www.bonappetit.com/story/line-cook-nycs-fanciest-restaurants?srsltid=AfmBOooa_tBf1KIhihGltwR7Jv8MLSBXOow92v-QGn3B7HOslZKkJ74w',
   },
   {
     name: 'The New York Times',
-    href: 'https://www.nytimes.com/2021/01/11/dining/how-high-end-restaurants-have-failed-black-female-chefs.html',
+    href: 'https://www.nytimes.com/2021/01/11/dining/black-women-fine-dining-restaurant-kitchens.html',
   },
   {
     name: 'Forbes',
-    href: 'https://www.forbes.com/search/?q=Nana+Araba+Wilmot',
+    href: 'https://www.forbes.com/sites/andywang/2023/07/27/james-beard-foundations-platform-celebrates-black-culinary-excellence/',
   },
   {
     name: 'Eater',
-    href: 'https://www.eater.com/search?q=Nana+Araba+Wilmot',
+    href: 'https://www.eater.com/23617676/west-african-fine-dining-restaurants-in-america',
   },
   {
     name: 'Cherry Bombe',
     href: 'https://cherrybombe.com/blogs/radio-cherry-bombe/chefs-nana-wilmot-and-lana-lagomarsini-are-redefining-fine-dining',
-  },
-  {
-    name: 'Food Network · Chopped',
-    href: 'https://www.foodnetwork.com/shows/chopped/episodes/zhoug-topia',
   },
   {
     name: 'Bravo · Top Chef S23',
