@@ -82,16 +82,16 @@ export default function Services() {
         </div>
       </FadeIn>
 
-      {/* Services Grid */}
+      {/* Services Grid — 6-col so the bottom row of 2 centers under the top row of 3 */}
       <div
-        className="flex flex-wrap justify-center"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6"
         style={{ maxWidth: '1100px', marginLeft: 'auto', marginRight: 'auto', gap: '2px' }}
       >
         {services.map((service, i) => (
           <FadeIn
             key={service.number}
             delay={(i % 3) * 0.1}
-            className="h-full w-full sm:w-[calc(50%-1px)] lg:w-[calc(33.333%-2px)]"
+            className={`h-full lg:col-span-2 ${i === 3 ? 'lg:col-start-2' : ''}`}
           >
             <ServiceCard {...service} />
           </FadeIn>
