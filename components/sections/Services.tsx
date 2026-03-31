@@ -13,14 +13,6 @@ const services = [
   },
   {
     number: '02',
-    title: 'Full-Service Catering',
-    description:
-      'Weddings, corporate events, brunches, graduations. Full team. Full service. Flavors that your guests will remember for years.',
-    linkText: 'Inquire →',
-    href: '#booking',
-  },
-  {
-    number: '03',
     title: 'Travel Chef',
     description:
       'New York · Philadelphia · Accra. Nana brings her kitchen to you — wherever you are. Available for destination events and residential residencies.',
@@ -28,7 +20,7 @@ const services = [
     href: '#booking',
   },
   {
-    number: '04',
+    number: '03',
     title: 'Love That I Knead Supper Club',
     description:
       'Ticketed West African-inspired dinner experiences. Intimate, communal, and soulful — from Brooklyn lofts to Accra terraces.',
@@ -36,7 +28,7 @@ const services = [
     href: '#supper',
   },
   {
-    number: '05',
+    number: '04',
     title: 'Menu Consulting & Education',
     description:
       'Menu development, culinary education, and cooking experiences for restaurants, institutions, and private clients seeking cultural depth.',
@@ -44,7 +36,7 @@ const services = [
     href: '#booking',
   },
   {
-    number: '06',
+    number: '05',
     title: 'Shop (Coming Soon)',
     description:
       'Sauces, spice blends, and culinary products bringing West African pantry essentials to your home kitchen.',
@@ -92,11 +84,15 @@ export default function Services() {
 
       {/* Services Grid */}
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        className="flex flex-wrap justify-center"
         style={{ maxWidth: '1100px', marginLeft: 'auto', marginRight: 'auto', gap: '2px' }}
       >
         {services.map((service, i) => (
-          <FadeIn key={service.number} delay={(i % 3) * 0.1} className="h-full">
+          <FadeIn
+            key={service.number}
+            delay={(i % 3) * 0.1}
+            className="h-full w-full sm:w-[calc(50%-1px)] lg:w-[calc(33.333%-2px)]"
+          >
             <ServiceCard {...service} />
           </FadeIn>
         ))}

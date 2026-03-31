@@ -15,18 +15,14 @@ const events = [
     price: '$180',
   },
   {
-    date: 'Apr 20',
-    title: 'Baldor Bites with Chef Lana',
-  },
-  {
     date: 'Apr 23 - 25',
     location: 'Washington D.C.',
-    title: 'Black Women In Food Summit',
+    title: 'Black Women In Food Summit Panelist',
   },
   {
     date: 'Apr 26',
     location: 'Philadelphia, PA',
-    title: 'Meals On Wheels',
+    title: 'Meals On Wheels Celebrity Brunch',
   },
 ]
 
@@ -83,7 +79,7 @@ export default function SupperClub() {
 
         <FadeIn delay={0.2}>
           <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-7" style={{ maxWidth: '480px' }}>
-            An intimate supper club series celebrating the foodways of West Africa — reimagined
+            An intimate supper club series celebrating the foodways of West Africa and beyond reimagined
             through a fine-dining lens and served around a communal table. Each dinner is a four
             to five course journey through history, memory, and flavor.
           </p>

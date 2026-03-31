@@ -14,7 +14,6 @@ const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 const VALID_EVENT_TYPES = new Set([
   'Private Chef Dinner',
-  'Full-Service Catering',
   'Love That I Knead Supper Club',
   'Travel Chef',
   'Menu Consulting',

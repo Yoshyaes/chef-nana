@@ -5,7 +5,7 @@ import CredentialCard from '@/components/ui/CredentialCard'
 import Button from '@/components/ui/Button'
 
 const credentials = [
-  { year: '2017 – 2019', name: 'Le Coucou, NYC<br>Michelin Star · James Beard' },
+  { year: '2016 – 2019', name: 'Le Coucou, NYC<br>Michelin Star · James Beard' },
   { year: '2023', name: 'Culinarian Award<br>Black Women in Food' },
   { year: '2024', name: '<em>The Contemporary African Kitchen</em><br>Contributor' },
   { year: '2026', name: 'Top Chef Season 23<br>Bravo · Now Airing' },

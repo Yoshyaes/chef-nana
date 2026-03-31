@@ -18,7 +18,6 @@ interface FormData {
 
 const EVENT_TYPES = [
   'Private Chef Dinner',
-  'Full-Service Catering',
   'Love That I Knead Supper Club',
   'Travel Chef',
   'Menu Consulting',
