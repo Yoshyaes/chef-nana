@@ -136,9 +136,16 @@ export default function Booking() {
               <p className="font-cormorant text-[28px] italic text-terracotta mb-4">
                 Your inquiry has been received.
               </p>
-              <p className="text-[15px] text-brown-mid font-light">
+              <p className="text-[15px] text-brown-mid font-light mb-8">
                 Nana will be in touch within 24 hours.
               </p>
+              <button
+                onClick={() => { setForm(initialForm); setStatus('idle') }}
+                className="text-[11px] tracking-[0.2em] uppercase text-gold font-medium cursor-pointer bg-transparent border border-gold/30 transition-all duration-200 hover:border-gold hover:bg-gold/[0.06]"
+                style={{ paddingLeft: '32px', paddingRight: '32px', paddingTop: '14px', paddingBottom: '14px' }}
+              >
+                Submit Another Inquiry
+              </button>
             </div>
           </FadeIn>
         ) : (
