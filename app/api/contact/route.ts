@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 const BOOKING_EMAIL = process.env.BOOKING_EMAIL ?? 'nana@georginasfoods.com'
+const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID
 
 function getResend() {
   const key = process.env.RESEND_API_KEY
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
       </div>
     `
 
-    // Build confirmation email HTML
+    // Build confirmation email HTML (includes inquiry details)
     const confirmationHtml = `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px; background: #F7F1E8; color: #1E1008;">
         <h1 style="font-size: 28px; font-weight: 300; margin-bottom: 8px; color: #2C1A0E;">
@@ -138,6 +139,23 @@ export async function POST(req: NextRequest) {
         <p style="font-size: 16px; line-height: 1.8; color: #5C3A22; margin: 24px 0; font-style: italic;">
           Thank you for reaching out. I will be in touch within 24 hours to discuss your event and how we can make it something your guests will never forget.
         </p>
+        <hr style="border: none; border-top: 1px solid rgba(201,151,58,0.3); margin: 24px 0;" />
+        <p style="font-size: 12px; color: #5C3A22; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Your Inquiry Details</p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold; width: 140px;">Name</td><td>${firstName} ${lastName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Email</td><td>${email}</td></tr>
+          ${phone ? `<tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Phone</td><td>${phone}</td></tr>` : ''}
+          <tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Event Type</td><td>${eventType}</td></tr>
+          ${eventDate ? `<tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Event Date</td><td>${eventDate}</td></tr>` : ''}
+          ${guestCount ? `<tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Guest Count</td><td>${guestCount}</td></tr>` : ''}
+          ${location ? `<tr><td style="padding: 8px 0; color: #5C3A22; font-weight: bold;">Location</td><td>${location}</td></tr>` : ''}
+        </table>
+        ${vision ? `
+        <hr style="border: none; border-top: 1px solid rgba(201,151,58,0.3); margin: 24px 0;" />
+        <p style="font-size: 12px; color: #5C3A22; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Your Vision</p>
+        <p style="font-size: 14px; line-height: 1.7; color: #2C1A0E;">${vision}</p>
+        ` : ''}
+        <hr style="border: none; border-top: 1px solid rgba(201,151,58,0.3); margin: 24px 0;" />
         <p style="font-size: 14px; line-height: 1.8; color: #5C3A22; margin: 16px 0;">
           In the meantime, feel free to explore upcoming <a href="https://chefnanawilmot.com/#supper" style="color: #C9973A;">Love That I Knead</a> events.
         </p>
@@ -173,6 +191,16 @@ export async function POST(req: NextRequest) {
 
     if (notificationResult.status === 'rejected') {
       throw new Error('Failed to send notification email')
+    }
+
+    // Add to newsletter audience (non-blocking — don't fail the request if this errors)
+    if (RESEND_AUDIENCE_ID) {
+      resend.contacts.create({
+        audienceId: RESEND_AUDIENCE_ID,
+        email,
+        firstName,
+        lastName,
+      }).catch(() => {})
     }
 
     return NextResponse.json({
