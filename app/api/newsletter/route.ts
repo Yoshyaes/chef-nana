@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
 
-const CONVERTKIT_API_KEY = process.env.CONVERTKIT_API_KEY
-const CONVERTKIT_FORM_ID = process.env.CONVERTKIT_FORM_ID
+const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID
+
+function getResend() {
+  const key = process.env.RESEND_API_KEY
+  if (!key) throw new Error('RESEND_API_KEY is not configured')
+  return new Resend(key)
+}
 
 function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -19,27 +25,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!CONVERTKIT_API_KEY || !CONVERTKIT_FORM_ID) {
-      // ConvertKit not configured yet — log and return success for now
+    if (!RESEND_AUDIENCE_ID) {
       return NextResponse.json({ success: true })
     }
 
-    const res = await fetch(
-      `https://api.convertkit.com/v3/forms/${CONVERTKIT_FORM_ID}/subscribe`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: CONVERTKIT_API_KEY,
-          email,
-        }),
-      }
-    )
-
-    if (!res.ok) {
-      const data = await res.json()
-      throw new Error(data.message ?? 'ConvertKit subscription failed')
-    }
+    const resend = getResend()
+    await resend.contacts.create({
+      audienceId: RESEND_AUDIENCE_ID,
+      email,
+    })
 
     return NextResponse.json({ success: true })
   } catch {
