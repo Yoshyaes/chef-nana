@@ -13,7 +13,14 @@ const fadeUp = (delay: number) => ({
   transition: { duration: 1.2, ease: EASE, delay },
 })
 
-export default function Hero() {
+const defaultTagline = 'Michelin-trained private chef reimagining West African heritage cuisine for the modern table. Private dining, catering, and supper clubs across three continents.'
+
+interface HeroProps {
+  siteSettings?: { heroTagline?: string } | null
+}
+
+export default function Hero({ siteSettings }: HeroProps) {
+  const tagline = siteSettings?.heroTagline || defaultTagline
   return (
     <section
       className="relative min-h-screen flex items-end overflow-hidden"
@@ -148,8 +155,7 @@ export default function Hero() {
           className="text-[15px] leading-[1.7] text-cream/75 font-light mb-10"
           style={{ maxWidth: '420px' }}
         >
-          Michelin-trained private chef reimagining West African heritage cuisine for the modern
-          table. Private dining, catering, and supper clubs across three continents.
+          {tagline}
         </motion.p>
 
         {/* City tags */}

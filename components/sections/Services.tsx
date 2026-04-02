@@ -2,9 +2,8 @@ import FadeIn from '@/components/ui/FadeIn'
 import SectionLabel from '@/components/ui/SectionLabel'
 import ServiceCard from '@/components/ui/ServiceCard'
 
-const services = [
+const defaultServices = [
   {
-    number: '01',
     title: 'Private Chef & Dining',
     description:
       'Intimate dinners for 2, milestone celebrations for 50. Fully custom menus rooted in West African tradition with fine-dining precision.',
@@ -12,7 +11,6 @@ const services = [
     href: '#booking',
   },
   {
-    number: '02',
     title: 'Travel Chef',
     description:
       'New York · Philadelphia · Accra. Nana brings her kitchen to you — wherever you are. Available for destination events and residential residencies.',
@@ -20,7 +18,6 @@ const services = [
     href: '#booking',
   },
   {
-    number: '03',
     title: 'Love That I Knead Supper Club',
     description:
       'Ticketed West African-inspired dinner experiences. Intimate, communal, and soulful — from Brooklyn lofts to Accra terraces.',
@@ -28,7 +25,6 @@ const services = [
     href: '#supper',
   },
   {
-    number: '04',
     title: 'Menu Consulting & Education',
     description:
       'Menu development, culinary education, and cooking experiences for restaurants, institutions, and private clients seeking cultural depth.',
@@ -36,7 +32,6 @@ const services = [
     href: '#booking',
   },
   {
-    number: '05',
     title: 'Shop (Coming Soon)',
     description:
       'Sauces, spice blends, and culinary products bringing West African pantry essentials to your home kitchen.',
@@ -45,7 +40,15 @@ const services = [
   },
 ]
 
-export default function Services() {
+interface ServicesProps {
+  services?: { title: string; description: string; linkText: string; href: string }[] | null
+}
+
+export default function Services({ services: cmsServices }: ServicesProps) {
+  const services = (cmsServices?.length ? cmsServices : defaultServices).map((s, i) => ({
+    ...s,
+    number: String(i + 1).padStart(2, '0'),
+  }))
   return (
     <section
       id="services"

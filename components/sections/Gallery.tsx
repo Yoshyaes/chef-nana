@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionLabel from '@/components/ui/SectionLabel'
+import { urlFor } from '@/lib/sanity'
 
 interface GalleryCell {
   caption: string
@@ -11,7 +12,7 @@ interface GalleryCell {
   gradient?: string
 }
 
-const cells: GalleryCell[] = [
+const defaultCells: GalleryCell[] = [
   {
     caption: 'Small Bowls · Love That I Knead',
     image: { src: '/images/nana-lifestyle.jpg', alt: 'Wooden bowls being plated', position: 'object-center' },
@@ -34,7 +35,21 @@ const cells: GalleryCell[] = [
   },
 ]
 
-export default function Gallery() {
+interface GalleryProps {
+  galleryImages?: { image: unknown; alt: string; caption: string; position: string }[] | null
+}
+
+export default function Gallery({ galleryImages }: GalleryProps) {
+  const cells: GalleryCell[] = galleryImages?.length
+    ? galleryImages.map((img) => ({
+        caption: img.caption || '',
+        image: {
+          src: urlFor(img.image as Parameters<typeof urlFor>[0]).width(800).url(),
+          alt: img.alt,
+          position: img.position || 'object-center',
+        },
+      }))
+    : defaultCells
   return (
     <section
       id="gallery"

@@ -7,7 +7,7 @@ import SectionLabel from '@/components/ui/SectionLabel'
 import EventCard from '@/components/ui/EventCard'
 import Button from '@/components/ui/Button'
 
-const events = [
+const defaultEvents = [
   {
     date: 'Apr 11 + 12',
     location: 'Washington D.C.',
@@ -47,7 +47,16 @@ const images = [
   },
 ]
 
-export default function SupperClub() {
+const defaultDescription = `An intimate supper club series celebrating the foodways of West Africa and beyond reimagined through a fine-dining lens and served around a communal table. Each dinner is a four to five course journey through history, memory, and flavor.`
+
+interface SupperClubProps {
+  events?: { date: string; location?: string; title: string; price?: string }[] | null
+  siteSettings?: { supperClubDescription?: string } | null
+}
+
+export default function SupperClub({ events: cmsEvents, siteSettings }: SupperClubProps) {
+  const events = cmsEvents?.length ? cmsEvents : defaultEvents
+  const description = siteSettings?.supperClubDescription || defaultDescription
   return (
     <section
       id="supper"
@@ -79,9 +88,7 @@ export default function SupperClub() {
 
         <FadeIn delay={0.2}>
           <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-7" style={{ maxWidth: '480px' }}>
-            An intimate supper club series celebrating the foodways of West Africa and beyond reimagined
-            through a fine-dining lens and served around a communal table. Each dinner is a four
-            to five course journey through history, memory, and flavor.
+            {description}
           </p>
           <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-9" style={{ maxWidth: '480px' }}>
             Pairings. Stories. Culture. No two dinners are the same.

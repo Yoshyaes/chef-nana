@@ -1,7 +1,7 @@
 import FadeIn from '@/components/ui/FadeIn'
 import SectionLabel from '@/components/ui/SectionLabel'
 
-const publications = [
+const defaultPublications = [
   {
     name: 'Bon Appétit',
     href: 'https://www.bonappetit.com/story/line-cook-nycs-fanciest-restaurants?srsltid=AfmBOooa_tBf1KIhihGltwR7Jv8MLSBXOow92v-QGn3B7HOslZKkJ74w',
@@ -28,7 +28,12 @@ const publications = [
   },
 ]
 
-export default function PressGrid() {
+interface PressGridProps {
+  pressItems?: { name: string; href: string }[] | null
+}
+
+export default function PressGrid({ pressItems }: PressGridProps) {
+  const publications = pressItems?.length ? pressItems : defaultPublications
   return (
     <section
       id="press"

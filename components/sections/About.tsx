@@ -4,14 +4,31 @@ import SectionLabel from '@/components/ui/SectionLabel'
 import CredentialCard from '@/components/ui/CredentialCard'
 import Button from '@/components/ui/Button'
 
-const credentials = [
+const defaultCredentials = [
   { year: '2016 – 2019', name: 'Le Coucou, NYC<br>Michelin Star · James Beard' },
   { year: '2023', name: 'Culinarian Award<br>Black Women in Food' },
   { year: '2024', name: '<em>The Contemporary African Kitchen</em><br>Contributor' },
   { year: '2026', name: 'Top Chef Season 23<br>Bravo · Now Airing' },
 ]
 
-export default function About() {
+const defaultBio1 = `Nana Araba Wilmot grew up in Cherry Hill, New Jersey — but her culinary roots reach back to the kitchens of Accra, Ghana. After graduating from the Art Institute of Philadelphia, she trained under Iron Chef José Garcés and went on to cook at Daniel Rose\u2019s Le Coucou — helping earn its Michelin Star and James Beard Award.`
+
+const defaultBio2 = `During the pandemic, Nana returned to Cherry Hill and launched Love That I Knead from her backyard — an intimate supper club rooted in West African foodways. Today, she operates Georgina\u2019s Private Chef & Catering Co. across New York, Philadelphia, and Accra.`
+
+interface AboutProps {
+  credentials?: { year: string; name: string }[] | null
+  siteSettings?: {
+    quote?: string
+    bioParagraph1?: string
+    bioParagraph2?: string
+  } | null
+}
+
+export default function About({ credentials: cmsCredentials, siteSettings }: AboutProps) {
+  const credentials = cmsCredentials?.length ? cmsCredentials : defaultCredentials
+  const bio1 = siteSettings?.bioParagraph1 || defaultBio1
+  const bio2 = siteSettings?.bioParagraph2 || defaultBio2
+  const quote = siteSettings?.quote || 'I always do it for the culture.'
   return (
     <section
       id="about"
@@ -46,7 +63,7 @@ export default function About() {
           style={{ bottom: 'clamp(32px, 5vw, 70px)', paddingLeft: 'clamp(20px, 4vw, 48px)', paddingRight: 'clamp(20px, 4vw, 48px)' }}
         >
           <p className="font-cormorant text-[24px] italic text-gold-pale leading-[1.5]">
-            &ldquo;I always do it for the culture.&rdquo;
+            &ldquo;{quote}&rdquo;
           </p>
           <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-gold/60">
             &mdash; Chef Nana Araba Wilmot
@@ -83,16 +100,10 @@ export default function About() {
 
         <FadeIn delay={0.2}>
           <p className="text-[16px] leading-[1.85] text-brown-mid font-light mb-6" style={{ maxWidth: '480px' }}>
-            Nana Araba Wilmot grew up in Cherry Hill, New Jersey — but her culinary roots reach
-            back to the kitchens of Accra, Ghana. After graduating from the Art Institute of
-            Philadelphia, she trained under Iron Chef José Garcés and went on to cook at Daniel
-            Rose&rsquo;s Le Coucou — helping earn its Michelin Star and James Beard Award.
+            {bio1}
           </p>
           <p className="text-[16px] leading-[1.85] text-brown-mid font-light mb-6" style={{ maxWidth: '480px' }}>
-            During the pandemic, Nana returned to Cherry Hill and launched Love That I Knead from
-            her backyard — an intimate supper club rooted in West African foodways. Today, she
-            operates Georgina&rsquo;s Private Chef &amp; Catering Co. across New York,
-            Philadelphia, and Accra.
+            {bio2}
           </p>
         </FadeIn>
 

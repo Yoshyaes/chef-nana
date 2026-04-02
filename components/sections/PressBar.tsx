@@ -1,4 +1,4 @@
-const PUBLICATIONS = [
+const DEFAULT_PUBLICATIONS = [
   'Bon Appétit',
   'The New York Times',
   'Forbes',
@@ -9,10 +9,10 @@ const PUBLICATIONS = [
   'Philadelphia Museum of Art',
 ]
 
-function MarqueeGroup() {
+function MarqueeGroup({ names }: { names: string[] }) {
   return (
     <div className="flex items-center shrink-0">
-      {PUBLICATIONS.map((name, i) => (
+      {names.map((name, i) => (
         <span key={i} className="flex items-center shrink-0">
           <span
             className="font-cormorant text-[13px] italic tracking-[0.12em]"
@@ -33,12 +33,18 @@ function MarqueeGroup() {
   )
 }
 
-export default function PressBar() {
+interface PressBarProps {
+  pressItems?: { name: string }[] | null
+}
+
+export default function PressBar({ pressItems }: PressBarProps) {
+  const names = pressItems?.length ? pressItems.map((p) => p.name) : DEFAULT_PUBLICATIONS
+
   return (
     <div className="bg-brown overflow-hidden" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
       <div className="flex animate-marquee whitespace-nowrap">
-        <MarqueeGroup />
-        <MarqueeGroup />
+        <MarqueeGroup names={names} />
+        <MarqueeGroup names={names} />
       </div>
     </div>
   )
