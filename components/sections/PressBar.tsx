@@ -1,3 +1,5 @@
+'use client'
+
 const DEFAULT_PUBLICATIONS = [
   'Bon Appétit',
   'The New York Times',
