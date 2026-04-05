@@ -41,11 +41,20 @@ export default function PressBar({ pressItems }: PressBarProps) {
   const names = pressItems?.length ? pressItems.map((p) => p.name) : DEFAULT_PUBLICATIONS
 
   return (
-    <div className="bg-brown overflow-hidden" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
-      <div className="flex animate-marquee whitespace-nowrap">
+    <a
+      href="#press"
+      onClick={(e) => {
+        e.preventDefault()
+        document.getElementById('press')?.scrollIntoView({ behavior: 'smooth' })
+      }}
+      className="block bg-brown overflow-hidden cursor-pointer no-underline"
+      style={{ paddingTop: '18px', paddingBottom: '18px' }}
+    >
+      <div className="flex animate-marquee whitespace-nowrap" style={{ width: 'max-content' }}>
+        <MarqueeGroup names={names} />
         <MarqueeGroup names={names} />
         <MarqueeGroup names={names} />
       </div>
-    </div>
+    </a>
   )
 }
