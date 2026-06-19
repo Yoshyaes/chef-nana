@@ -28,8 +28,7 @@ function LeadCard({ lead, onStageChange }: { lead: Lead; onStageChange: (id: str
   return (
     <div style={{
       background: '#fff', border: '1px solid #eee5d7', borderRadius: 10,
-      padding: 14, marginBottom: 8, cursor: 'pointer',
-      transition: 'border-color 0.15s, box-shadow 0.15s',
+      padding: 14, marginBottom: 8,
     }}>
       <Link href={`/admin/leads/${lead.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div style={{ fontWeight: 500, fontSize: 14, color: 'var(--brown)', marginBottom: 2 }}>{lead.name}</div>

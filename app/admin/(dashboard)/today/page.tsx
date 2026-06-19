@@ -90,7 +90,6 @@ export default function TodayPage() {
         </div>
       ) : (
         <>
-          {/* Stats bar */}
           {triage.stats && (
             <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
               {[
@@ -110,7 +109,6 @@ export default function TodayPage() {
             </div>
           )}
 
-          {/* TLDR */}
           <div style={{
             background: '#fff', border: '1px solid #eee5d7', borderRadius: 12,
             padding: 24, marginBottom: 24,
@@ -123,7 +121,6 @@ export default function TodayPage() {
             </p>
           </div>
 
-          {/* Action list */}
           {triage.actions?.length > 0 && (
             <div>
               <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>

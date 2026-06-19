@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import { Cormorant_Garamond, Jost } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
-import Nav from '@/components/layout/Nav'
-import Footer from '@/components/layout/Footer'
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
@@ -111,9 +109,7 @@ export default function RootLayout({
             `}</Script>
           </>
         )}
-        <Nav />
         {children}
-        <Footer />
       </body>
     </html>
   )

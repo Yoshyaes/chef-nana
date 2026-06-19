@@ -69,7 +69,6 @@ export default function SettingsPage() {
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400, marginBottom: 32 }}>Settings</h1>
 
       <form onSubmit={handleSave}>
-        {/* API Keys */}
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 16 }}>API Keys</div>
 
@@ -91,16 +90,15 @@ export default function SettingsPage() {
             </div>
           ))}
 
-          {/* Spend meter */}
           <div style={{ marginTop: 20, padding: '16px', background: '#faf7f3', borderRadius: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--brown)', marginBottom: 8 }}>
               <span>API spend this month</span>
               <span style={{ fontWeight: 600 }}>${settings.current_month_spend.toFixed(2)} / ${settings.monthly_budget_cap}</span>
             </div>
             <div style={{ height: 6, background: '#f0e8db', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${spendPct}%`, background: spendPct >= 80 ? 'var(--terracotta)' : 'var(--gold)', borderRadius: 3 }} />
+              <div style={{ height: '100%', width: `${spendPct}%`, background: spendPct >= 80 ? '#B85A35' : 'var(--gold)', borderRadius: 3 }} />
             </div>
-            {spendPct >= 80 && <div style={{ fontSize: 12, color: 'var(--terracotta)', marginTop: 8 }}>⚠ Approaching budget cap</div>}
+            {spendPct >= 80 && <div style={{ fontSize: 12, color: '#B85A35', marginTop: 8 }}>⚠ Approaching budget cap</div>}
           </div>
 
           <div style={{ marginTop: 16 }}>
@@ -110,7 +108,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Brand voice */}
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Your voice</div>
           <textarea
@@ -125,7 +122,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Email */}
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Email sending</div>
           <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Sending domain</label>
@@ -139,7 +135,6 @@ export default function SettingsPage() {
         </button>
       </form>
 
-      {/* Apollo search */}
       <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginTop: 24 }}>
         <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Find leads via Apollo</div>
         <form onSubmit={handleApolloSearch} style={{ display: 'flex', gap: 10 }}>

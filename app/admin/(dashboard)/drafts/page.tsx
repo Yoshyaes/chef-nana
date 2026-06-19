@@ -86,7 +86,6 @@ export default function DraftsPage() {
 
   return (
     <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 64px)', margin: -32 }}>
-      {/* Queue list */}
       <div style={{ width: 300, borderRight: '1px solid #eee5d7', overflowY: 'auto', background: '#faf7f3' }}>
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid #eee5d7' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--brown)', fontWeight: 400 }}>
@@ -120,7 +119,6 @@ export default function DraftsPage() {
         ))}
       </div>
 
-      {/* Draft detail */}
       <div style={{ flex: 1, padding: 32, overflowY: 'auto' }}>
         {!selected ? (
           <div style={{ color: '#9a7d5a', fontSize: 14, marginTop: 60, textAlign: 'center' }}>Select a draft to review</div>
@@ -169,7 +167,7 @@ export default function DraftsPage() {
               {!editing ? (
                 <>
                   <button onClick={handleApprove} disabled={!!actionLoading}
-                    style={{ padding: '10px 20px', background: 'var(--green-dark)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ padding: '10px 20px', background: '#2D5F3D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                     {actionLoading === 'approve' ? 'Sending…' : 'Approve & send'}
                   </button>
                   <button onClick={() => { setEditing(true); setEditBody(selected.body); setEditSubject(selected.subject) }}
@@ -181,7 +179,7 @@ export default function DraftsPage() {
                     {actionLoading === 'redraft' ? 'Queuing…' : 'Redraft'}
                   </button>
                   <button onClick={handleReject} disabled={!!actionLoading}
-                    style={{ padding: '10px 18px', background: 'transparent', color: 'var(--terracotta)', border: '1px solid #f0d5cc', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}>
+                    style={{ padding: '10px 18px', background: 'transparent', color: '#B85A35', border: '1px solid #f0d5cc', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}>
                     Reject
                   </button>
                 </>

@@ -15,7 +15,7 @@ const navItems = [
 ]
 
 const toolItems = [
-  { label: 'Content Studio', href: '/studio', icon: '✐', external: false },
+  { label: 'Content', href: '/admin/content', icon: '✐', external: false },
   { label: 'Settings', href: '/admin/settings', icon: '⚙', external: false },
 ]
 

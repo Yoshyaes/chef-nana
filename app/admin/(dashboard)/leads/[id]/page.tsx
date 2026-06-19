@@ -42,19 +42,6 @@ export default function LeadDetailPage() {
 
   async function handleDraft() {
     setDrafting(true)
-    await fetch('/api/admin/drafts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // Trigger via Inngest
-      body: JSON.stringify({ leadId: id }),
-    })
-    // Actually trigger via Inngest
-    await fetch(`/api/admin/drafts/00000000-0000-0000-0000-000000000001/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ step: 1 }),
-    }).catch(() => {})
-    // Use the leads research endpoint to trigger a draft generation
     await fetch(`/api/admin/leads/${id}/research`, { method: 'POST' })
     setDrafting(false)
     alert('Draft queued — check Drafts in ~30 seconds')
@@ -68,7 +55,7 @@ export default function LeadDetailPage() {
   const research = enrichment.find(e => e.provider === 'claude')
 
   if (loading) return <div style={{ color: '#9a7d5a', padding: 40 }}>Loading…</div>
-  if (!lead) return <div style={{ color: 'var(--terracotta)', padding: 40 }}>Lead not found.</div>
+  if (!lead) return <div style={{ color: '#B85A35', padding: 40 }}>Lead not found.</div>
 
   return (
     <div>
@@ -77,7 +64,6 @@ export default function LeadDetailPage() {
       </div>
 
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-        {/* Main content */}
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--brown)', fontWeight: 400 }}>{lead.name}</h1>
@@ -100,7 +86,6 @@ export default function LeadDetailPage() {
             </button>
           </div>
 
-          {/* Research brief */}
           {research?.research_brief ? (
             <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 24 }}>
               <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>What I found</div>
@@ -119,7 +104,6 @@ export default function LeadDetailPage() {
             </div>
           )}
 
-          {/* Timeline */}
           <div>
             <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Timeline</div>
             {[...messages, ...drafts.map(d => ({ id: d.id, direction: 'draft', channel: 'email', subject: d.subject, body: `Draft: ${d.subject ?? 'Outreach'} (${d.status})`, sent_at: d.created_at }))].sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime()).map(item => (
@@ -143,7 +127,6 @@ export default function LeadDetailPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div style={{ width: 220, flexShrink: 0 }}>
           <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 20 }}>
             <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>Stage</div>
