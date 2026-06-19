@@ -9,6 +9,7 @@ const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
 export default defineConfig({
   name: 'chef-nana',
   title: 'Chef Nana Website',
+  basePath: '/studio',
   projectId,
   dataset,
   plugins: [
