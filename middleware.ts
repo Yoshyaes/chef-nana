@@ -4,8 +4,12 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Pass through: login page and Inngest webhook
-  if (pathname === '/admin/login' || pathname.startsWith('/api/admin/inngest')) {
+  // Pass through: login page, OAuth callback, and Inngest webhook
+  if (
+    pathname === '/admin/login' ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/admin/inngest')
+  ) {
     return NextResponse.next()
   }
 
@@ -46,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/auth/:path*'],
 }
