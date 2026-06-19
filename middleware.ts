@@ -2,7 +2,16 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+
+  // Supabase sometimes sends the OAuth code to the site root instead of /auth/callback
+  // when the redirect URL allowlist hasn't propagated. Catch it here and forward it.
+  if (pathname === '/' && searchParams.has('code')) {
+    const callbackUrl = new URL('/auth/callback', request.url)
+    callbackUrl.searchParams.set('code', searchParams.get('code')!)
+    callbackUrl.searchParams.set('next', '/admin/today')
+    return NextResponse.redirect(callbackUrl)
+  }
 
   // Pass through: login page, OAuth callback, and Inngest webhook
   if (
@@ -50,5 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/auth/:path*'],
+  matcher: ['/', '/admin/:path*', '/auth/:path*'],
 }
