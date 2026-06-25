@@ -10,6 +10,7 @@ interface Settings {
   sending_domain: string
   anthropicKeySet: boolean
   apolloKeySet: boolean
+  notConfigured?: boolean
 }
 
 export default function SettingsPage() {
@@ -61,6 +62,24 @@ export default function SettingsPage() {
   }
 
   if (!settings) return <div style={{ color: '#9a7d5a', padding: 40 }}>Loading…</div>
+
+  if (settings.notConfigured) return (
+    <div style={{ maxWidth: 640 }}>
+      <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400, marginBottom: 24 }}>Settings</h1>
+      <div style={{ background: '#fef2f0', border: '1px solid #f5c6bb', borderRadius: 12, padding: 24 }}>
+        <div style={{ fontWeight: 600, color: '#B85A35', marginBottom: 8 }}>Supabase not configured</div>
+        <div style={{ fontSize: 13, color: '#5c3a22', lineHeight: 1.7 }}>
+          Add these three environment variables to Vercel to enable the assistant:
+          <ul style={{ marginTop: 10, paddingLeft: 20 }}>
+            <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+            <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+            <li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+          </ul>
+          Find them in your Supabase project → Settings → API.
+        </div>
+      </div>
+    </div>
+  )
 
   const spendPct = Math.min(100, (settings.current_month_spend / settings.monthly_budget_cap) * 100)
 

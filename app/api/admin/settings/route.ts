@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+const NOT_CONFIGURED = {
+  monthly_budget_cap: 25,
+  current_month_spend: 0,
+  brand_voice_notes: '',
+  approve_before_sending: true,
+  sending_domain: 'mail.chefnanawilmot.com',
+  anthropicKeySet: false,
+  apolloKeySet: false,
+  notConfigured: true,
+}
+
 export async function GET() {
-  const supabase = await createServiceClient()
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json(NOT_CONFIGURED)
+  }
+
+  let supabase: Awaited<ReturnType<typeof createServiceClient>>
+  try { supabase = await createServiceClient() } catch { return NextResponse.json(NOT_CONFIGURED) }
+
   const { data, error } = await supabase
     .from('settings')
     .select('monthly_budget_cap, current_month_spend, brand_voice_notes, approve_before_sending, sending_domain')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json(NOT_CONFIGURED)
 
   // Mask API keys — show only whether they're set
   const { data: full } = await supabase.from('settings').select('anthropic_api_key_encrypted, apollo_api_key_encrypted').single()
@@ -20,6 +37,9 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 })
+  }
   const supabase = await createServiceClient()
   const body = await req.json()
 
