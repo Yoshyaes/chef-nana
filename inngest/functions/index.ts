@@ -1,3 +1,6 @@
 export { researchLead } from './researchLead'
 export { generateDraft } from './generateDraft'
 export { dailyTriage } from './dailyTriage'
+export { checkGmailInbox } from './checkGmailInbox'
+export { handleInboundEmail } from './handleInboundEmail'
+export { handleDiscordInteraction } from './handleDiscordInteraction'

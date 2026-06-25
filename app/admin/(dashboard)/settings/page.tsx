@@ -10,6 +10,9 @@ interface Settings {
   sending_domain: string
   anthropicKeySet: boolean
   apolloKeySet: boolean
+  gmailConnected: boolean
+  gmailConnectedAt: string | null
+  discordConfigured: boolean
   notConfigured?: boolean
 }
 
@@ -25,6 +28,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(setSettings)
+    // Show flash messages from OAuth redirects
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('gmailConnected')) window.history.replaceState({}, '', '/admin/settings')
   }, [])
 
   async function handleSave(e: React.FormEvent) {
@@ -153,6 +159,66 @@ export default function SettingsPage() {
           {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save settings'}
         </button>
       </form>
+
+      {/* Gmail integration */}
+      <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginTop: 20 }}>
+        <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Gmail inbox</div>
+        {settings.gmailConnected ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ color: '#2D5F3D', fontSize: 13, fontWeight: 500 }}>✓ Connected</span>
+              {settings.gmailConnectedAt && (
+                <span style={{ color: '#9a7d5a', fontSize: 12, marginLeft: 8 }}>
+                  since {new Date(settings.gmailConnectedAt).toLocaleDateString()}
+                </span>
+              )}
+              <div style={{ fontSize: 12, color: '#9a7d5a', marginTop: 4 }}>
+                Checking georginasfoods@gmail.com every 10 minutes for replies from known leads.
+              </div>
+            </div>
+            <a href="/api/admin/gmail/auth"
+              style={{ fontSize: 12, color: '#9a7d5a', textDecoration: 'underline', cursor: 'pointer' }}>
+              Reconnect
+            </a>
+          </div>
+        ) : (
+          <div>
+            <div style={{ fontSize: 13, color: '#7a6652', marginBottom: 12, lineHeight: 1.6 }}>
+              Connect Gmail so the assistant can see replies from leads and auto-generate responses.
+              Requires <code>GMAIL_CLIENT_ID</code> and <code>GMAIL_CLIENT_SECRET</code> in Vercel.
+            </div>
+            <a href="/api/admin/gmail/auth">
+              <button
+                disabled={!process.env.NEXT_PUBLIC_SUPABASE_URL}
+                style={{ padding: '9px 20px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
+                Connect Gmail →
+              </button>
+            </a>
+          </div>
+        )}
+      </section>
+
+      {/* Discord integration */}
+      <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginTop: 20 }}>
+        <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Discord notifications</div>
+        {settings.discordConfigured ? (
+          <div style={{ color: '#2D5F3D', fontSize: 13, fontWeight: 500 }}>
+            ✓ Configured — draft notifications with Approve/Reject buttons will appear in your Discord channel.
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, color: '#7a6652', lineHeight: 1.7 }}>
+            Not configured. Add these to Vercel to enable Discord notifications:
+            <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+              <li><code>DISCORD_BOT_TOKEN</code></li>
+              <li><code>DISCORD_PUBLIC_KEY</code></li>
+              <li><code>DISCORD_APPLICATION_ID</code></li>
+              <li><code>DISCORD_CHANNEL_ID</code></li>
+            </ul>
+            Set Interactions Endpoint URL in Discord Developer Portal to{' '}
+            <code>https://chefnanawilmot.com/api/discord/interactions</code>
+          </div>
+        )}
+      </section>
 
       <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginTop: 24 }}>
         <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Find leads via Apollo</div>

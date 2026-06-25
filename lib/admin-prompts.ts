@@ -77,6 +77,43 @@ Return a JSON object:
 }
 `
 
+export const REPLY_PROMPT = (
+  lead: Record<string, unknown>,
+  researchBrief: string,
+  inboundEmail: { subject: string; body: string },
+  history: { direction: string; subject: string | null; body: string }[]
+) => `
+${BRAND_VOICE}
+
+A lead has replied to Nana's outreach. Write a reply from Nana that continues the conversation naturally.
+
+LEAD:
+${JSON.stringify(lead, null, 2)}
+
+RESEARCH BRIEF:
+${researchBrief}
+
+CONVERSATION HISTORY (oldest first):
+${history.map(m => `[${m.direction.toUpperCase()}] ${m.subject ?? ''}\n${m.body.slice(0, 400)}`).join('\n\n---\n\n')}
+
+THEIR LATEST MESSAGE:
+Subject: ${inboundEmail.subject}
+${inboundEmail.body.slice(0, 1000)}
+
+Write a reply from Nana. This is a real conversation — match the warmth and register of the exchange so far.
+- If they asked a question, answer it directly before anything else
+- If they expressed interest, advance toward a concrete next step (a call, a tasting, a proposal)
+- Keep it under 120 words unless more is genuinely needed
+- Never sound automated or templated
+
+Return a JSON object:
+{
+  "subject": "<Re: [their subject]>",
+  "body": "<email body — plain text, line breaks with \\n>",
+  "reasoning": "<2–3 sentences: what you picked up from their message, the angle you chose, what you're trying to move toward>"
+}
+`
+
 export const TRIAGE_PROMPT = (tasks: Record<string, unknown>[], stats: Record<string, number>) => `
 ${BRAND_VOICE}
 

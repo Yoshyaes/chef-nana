@@ -27,12 +27,18 @@ export async function GET() {
 
   if (error) return NextResponse.json(NOT_CONFIGURED)
 
-  // Mask API keys — show only whether they're set
-  const { data: full } = await supabase.from('settings').select('anthropic_api_key_encrypted, apollo_api_key_encrypted').single()
+  const { data: full } = await supabase
+    .from('settings')
+    .select('anthropic_api_key_encrypted, apollo_api_key_encrypted, gmail_refresh_token, gmail_connected_at')
+    .single()
+
   return NextResponse.json({
     ...data,
     anthropicKeySet: !!full?.anthropic_api_key_encrypted,
     apolloKeySet: !!full?.apollo_api_key_encrypted,
+    gmailConnected: !!full?.gmail_refresh_token,
+    gmailConnectedAt: full?.gmail_connected_at ?? null,
+    discordConfigured: !!(process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_CHANNEL_ID),
   })
 }
 

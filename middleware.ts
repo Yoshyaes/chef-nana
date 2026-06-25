@@ -13,11 +13,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(callbackUrl)
   }
 
-  // Pass through: login page, OAuth callback, and Inngest webhook
+  // Pass through: login, OAuth callbacks, Inngest webhook, Discord interactions, Gmail OAuth
   if (
     pathname === '/admin/login' ||
     pathname.startsWith('/auth/') ||
-    pathname.startsWith('/api/admin/inngest')
+    pathname.startsWith('/api/admin/inngest') ||
+    pathname.startsWith('/api/admin/gmail/') ||
+    pathname.startsWith('/api/discord/')
   ) {
     return NextResponse.next()
   }
@@ -59,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/admin/:path*', '/auth/:path*'],
+  matcher: ['/', '/admin/:path*', '/auth/:path*', '/api/discord/:path*', '/api/admin/gmail/:path*'],
 }
