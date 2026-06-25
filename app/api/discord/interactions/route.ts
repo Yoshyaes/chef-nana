@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { webcrypto } from 'node:crypto'
 import { inngest } from '@/inngest/client'
 
-function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
-  const bytes = new Uint8Array(new ArrayBuffer(hex.length / 2))
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2)
   for (let i = 0; i < hex.length; i += 2) {
     bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16)
   }
@@ -16,20 +17,21 @@ async function verifyDiscordSignature(
   rawBody: string
 ): Promise<boolean> {
   try {
-    const key = await crypto.subtle.importKey(
+    const key = await webcrypto.subtle.importKey(
       'raw',
       hexToBytes(publicKey),
       { name: 'Ed25519' },
       false,
       ['verify']
     )
-    return crypto.subtle.verify(
+    return await webcrypto.subtle.verify(
       { name: 'Ed25519' },
       key,
       hexToBytes(signature),
       new TextEncoder().encode(timestamp + rawBody)
     )
-  } catch {
+  } catch (err) {
+    console.error('Discord signature verification error:', err)
     return false
   }
 }
