@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
 
   if (error || !code) {
-    return NextResponse.redirect(new URL('/admin/settings?gmailError=denied', request.url))
+    return NextResponse.redirect(new URL('/admin/settings?gmailError=denied', 'https://www.chefnanawilmot.com'))
   }
 
   const clientId = process.env.GMAIL_CLIENT_ID!
@@ -30,8 +30,13 @@ export async function GET(request: NextRequest) {
 
   const tokens = await tokenRes.json()
 
+  if (!tokenRes.ok || tokens.error) {
+    const msg = encodeURIComponent(tokens.error_description ?? tokens.error ?? 'token_exchange_failed')
+    return NextResponse.redirect(new URL(`/admin/settings?gmailError=${msg}`, 'https://www.chefnanawilmot.com'))
+  }
+
   if (!tokens.refresh_token) {
-    return NextResponse.redirect(new URL('/admin/settings?gmailError=no_refresh_token', request.url))
+    return NextResponse.redirect(new URL('/admin/settings?gmailError=no_refresh_token', 'https://www.chefnanawilmot.com'))
   }
 
   // Get initial history ID so we don't process old messages
@@ -50,5 +55,5 @@ export async function GET(request: NextRequest) {
     })
     .neq('id', '00000000-0000-0000-0000-000000000000')
 
-  return NextResponse.redirect(new URL('/admin/settings?gmailConnected=1', request.url))
+  return NextResponse.redirect(new URL('/admin/settings?gmailConnected=1', 'https://www.chefnanawilmot.com'))
 }
