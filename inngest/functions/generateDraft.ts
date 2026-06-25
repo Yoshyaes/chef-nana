@@ -23,13 +23,20 @@ export const generateDraft = inngest.createFunction(
 
     const researchBrief = enrichment?.research_brief ?? 'No research available yet.'
 
+    const { data: settingsRow } = await supabase
+      .from('settings')
+      .select('brand_voice_notes, voice_examples')
+      .single()
+    const voiceNotes = settingsRow?.brand_voice_notes ?? ''
+    const voiceExamples = settingsRow?.voice_examples ?? ''
+
     const anthropic = await getAnthropicClient()
     if (!anthropic) return { error: 'Anthropic not configured' }
 
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 1024,
-      messages: [{ role: 'user', content: DRAFT_PROMPT(lead, researchBrief, step) }],
+      messages: [{ role: 'user', content: DRAFT_PROMPT(lead, researchBrief, step, voiceNotes, voiceExamples) }],
     })
 
     await updateMonthlySpend(response.usage.input_tokens, response.usage.output_tokens, 0, MODEL)

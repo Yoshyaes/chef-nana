@@ -6,6 +6,7 @@ interface Settings {
   monthly_budget_cap: number
   current_month_spend: number
   brand_voice_notes: string
+  voice_examples: string
   approve_before_sending: boolean
   sending_domain: string
   anthropicKeySet: boolean
@@ -40,6 +41,7 @@ export default function SettingsPage() {
     const body: Record<string, unknown> = {
       monthly_budget_cap: settings.monthly_budget_cap,
       brand_voice_notes: settings.brand_voice_notes,
+      voice_examples: settings.voice_examples,
       approve_before_sending: settings.approve_before_sending,
       sending_domain: settings.sending_domain,
     }
@@ -134,17 +136,33 @@ export default function SettingsPage() {
         </section>
 
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
-          <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Your voice</div>
+          <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 4 }}>Your voice</div>
+          <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 10 }}>Any additional notes on tone, things to always or never say, or context about your current focus.</div>
           <textarea
             value={settings.brand_voice_notes}
             onChange={e => setSettings(p => p ? { ...p, brand_voice_notes: e.target.value } : p)}
-            rows={4}
+            rows={3}
+            placeholder="e.g. I'm focused on Hamptons families right now. Don't pitch corporate events unless they reach out first."
             style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', lineHeight: 1.6, resize: 'vertical', fontFamily: 'inherit' }}
           />
           <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
             <input type="checkbox" id="approve" checked={settings.approve_before_sending} onChange={e => setSettings(p => p ? { ...p, approve_before_sending: e.target.checked } : p)} />
             <label htmlFor="approve" style={{ fontSize: 13, color: 'var(--brown)' }}>Approve before sending (recommended)</label>
           </div>
+        </section>
+
+        <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+          <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 4 }}>Writing examples</div>
+          <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 10, lineHeight: 1.6 }}>
+            Paste 2–5 real emails you&apos;ve written — the AI will study your sentence rhythm, punctuation, and word choices and match them exactly. Include the full email text, separated by a blank line. The more varied the examples (first touch, reply, follow-up), the better.
+          </div>
+          <textarea
+            value={settings.voice_examples}
+            onChange={e => setSettings(p => p ? { ...p, voice_examples: e.target.value } : p)}
+            rows={12}
+            placeholder={`Paste your actual sent emails here. For example:\n\nHey Sarah,\n\nSaw the estate listing and immediately thought of the Hamptons dinners I did last summer...\n\n— Nana\n\n---\n\nHi Marcus,\n\nThanks for the quick reply. Yes, I can absolutely do 80 people for the April retreat...`}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', lineHeight: 1.6, resize: 'vertical', fontFamily: 'inherit' }}
+          />
         </section>
 
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>

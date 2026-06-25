@@ -41,6 +41,14 @@ export const handleInboundEmail = inngest.createFunction(
     if (!lead) return { error: 'Lead not found' }
 
     const researchBrief = enrichment?.research_brief ?? 'No research available yet.'
+
+    const { data: settingsRow } = await supabase
+      .from('settings')
+      .select('brand_voice_notes, voice_examples')
+      .single()
+    const voiceNotes = settingsRow?.brand_voice_notes ?? ''
+    const voiceExamples = settingsRow?.voice_examples ?? ''
+
     const messageHistory = (history ?? []).map(m => ({
       direction: m.direction as string,
       subject: m.subject as string | null,
@@ -56,7 +64,7 @@ export const handleInboundEmail = inngest.createFunction(
       max_tokens: 1024,
       messages: [{
         role: 'user',
-        content: REPLY_PROMPT(lead, researchBrief, { subject, body }, messageHistory),
+        content: REPLY_PROMPT(lead, researchBrief, { subject, body }, messageHistory, voiceNotes, voiceExamples),
       }],
     })
 

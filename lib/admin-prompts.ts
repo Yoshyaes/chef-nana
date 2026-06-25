@@ -31,6 +31,20 @@ WRITING RULES:
 - Keep first-touch emails under 150 words. Every word counts.
 - Follow-ups: acknowledge the silence gracefully, add one new piece of value, make it easy to respond
 - Tone adjusts slightly by recipient type: more formal for estate managers/family offices, warmer for event clients
+
+BANNED WORDS AND PATTERNS — never use any of these, no exceptions:
+- Em dashes (— or --). Use a comma, period, or just a new sentence instead.
+- "Absolutely!" or "Certainly!" or any single-word exclamatory opener
+- "I hope" in any form
+- "dive in" / "delve into" / "navigate" / "landscape" / "game-changer" / "leverage" / "synergy"
+- "circle back" / "moving forward" / "going forward" / "reach out" (say "email" or "contact")
+- "sounds great" / "sounds good" / "sounds amazing"
+- Bullet points or numbered lists inside reply emails — prose only
+- Parenthetical asides (like this) — integrate the thought directly
+- Starting the very first word of the email body with "I"
+- Multiple exclamation points in the same email
+- "Just" as a softener ("I just wanted to…")
+- Rhetorical questions as openers ("Are you looking for…?")
 `
 
 export const RESEARCH_PROMPT = (leadData: Record<string, unknown>) => `
@@ -53,11 +67,18 @@ Return a JSON object with these fields:
 }
 `
 
-export const DRAFT_PROMPT = (lead: Record<string, unknown>, researchBrief: string, step: number = 1) => `
+export const DRAFT_PROMPT = (
+  lead: Record<string, unknown>,
+  researchBrief: string,
+  step: number = 1,
+  voiceNotes: string = '',
+  voiceExamples: string = '',
+) => `
 ${BRAND_VOICE}
 
 Write outreach step ${step} from Nana to this lead. This is a real email that will be sent — it must sound like Nana wrote it herself, not an AI.
-
+${voiceNotes ? `\nNANA'S ADDITIONAL VOICE NOTES:\n${voiceNotes}\n` : ''}
+${voiceExamples ? `\nEXAMPLES OF NANA'S ACTUAL WRITING (study the sentence rhythm, punctuation, and register — match this voice exactly):\n${voiceExamples}\n` : ''}
 LEAD:
 ${JSON.stringify(lead, null, 2)}
 
@@ -81,12 +102,15 @@ export const REPLY_PROMPT = (
   lead: Record<string, unknown>,
   researchBrief: string,
   inboundEmail: { subject: string; body: string },
-  history: { direction: string; subject: string | null; body: string }[]
+  history: { direction: string; subject: string | null; body: string }[],
+  voiceNotes: string = '',
+  voiceExamples: string = '',
 ) => `
 ${BRAND_VOICE}
 
 A lead has replied to Nana's outreach. Write a reply from Nana that continues the conversation naturally.
-
+${voiceNotes ? `\nNANA'S ADDITIONAL VOICE NOTES:\n${voiceNotes}\n` : ''}
+${voiceExamples ? `\nEXAMPLES OF NANA'S ACTUAL WRITING (study the sentence rhythm, punctuation, and register — match this voice exactly):\n${voiceExamples}\n` : ''}
 LEAD:
 ${JSON.stringify(lead, null, 2)}
 

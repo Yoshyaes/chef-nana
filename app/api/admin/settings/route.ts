@@ -22,7 +22,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('settings')
-    .select('monthly_budget_cap, current_month_spend, brand_voice_notes, approve_before_sending, sending_domain')
+    .select('monthly_budget_cap, current_month_spend, brand_voice_notes, voice_examples, approve_before_sending, sending_domain')
     .single()
 
   if (error) return NextResponse.json(NOT_CONFIGURED)
@@ -52,6 +52,7 @@ export async function PUT(req: NextRequest) {
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (body.monthly_budget_cap !== undefined) updates.monthly_budget_cap = body.monthly_budget_cap
   if (body.brand_voice_notes !== undefined) updates.brand_voice_notes = body.brand_voice_notes
+  if (body.voice_examples !== undefined) updates.voice_examples = body.voice_examples
   if (body.approve_before_sending !== undefined) updates.approve_before_sending = body.approve_before_sending
   if (body.sending_domain !== undefined) updates.sending_domain = body.sending_domain
   if (body.anthropic_api_key !== undefined) updates.anthropic_api_key_encrypted = body.anthropic_api_key
