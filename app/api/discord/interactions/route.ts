@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { webcrypto } from 'node:crypto'
+import nacl from 'tweetnacl'
 import { inngest } from '@/inngest/client'
 
 function hexToBytes(hex: string): Uint8Array {
@@ -10,28 +10,19 @@ function hexToBytes(hex: string): Uint8Array {
   return bytes
 }
 
-async function verifyDiscordSignature(
+function verifyDiscordSignature(
   publicKey: string,
   signature: string,
   timestamp: string,
   rawBody: string
-): Promise<boolean> {
+): boolean {
   try {
-    const key = await webcrypto.subtle.importKey(
-      'raw',
-      hexToBytes(publicKey),
-      { name: 'Ed25519' },
-      false,
-      ['verify']
-    )
-    return await webcrypto.subtle.verify(
-      { name: 'Ed25519' },
-      key,
+    return nacl.sign.detached.verify(
+      Buffer.from(timestamp + rawBody),
       hexToBytes(signature),
-      new TextEncoder().encode(timestamp + rawBody)
+      hexToBytes(publicKey)
     )
-  } catch (err) {
-    console.error('Discord signature verification error:', err)
+  } catch {
     return false
   }
 }
@@ -46,7 +37,7 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get('x-signature-ed25519') ?? ''
   const timestamp = request.headers.get('x-signature-timestamp') ?? ''
 
-  const valid = await verifyDiscordSignature(publicKey, signature, timestamp, rawBody)
+  const valid = verifyDiscordSignature(publicKey, signature, timestamp, rawBody)
   if (!valid) return new NextResponse('Invalid signature', { status: 401 })
 
   const body = JSON.parse(rawBody)
@@ -62,11 +53,8 @@ export async function POST(request: NextRequest) {
     const applicationId = body.application_id as string
     const interactionToken = body.token as string
 
-    // Respond immediately with DEFERRED_UPDATE_MESSAGE (type 6)
-    // This prevents Discord's 3-second timeout while Inngest handles the actual work
     const deferred = NextResponse.json({ type: 6 })
 
-    // Fire async Inngest job (non-blocking — response already prepared above)
     inngest.send({
       name: 'discord/interaction.received',
       data: { customId, applicationId, interactionToken },
