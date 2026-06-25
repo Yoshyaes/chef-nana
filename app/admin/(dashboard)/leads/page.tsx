@@ -14,10 +14,15 @@ const STAGE_COLORS: Record<string, string> = {
   negotiating: '#8aa86a', won: '#2D5F3D', lost: '#ccc', nurture: '#b0c4d8',
 }
 
+const MARKETS = ['Corporate events', 'Private dining', 'Weddings', 'Meal prep', 'Retreats', 'Other']
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ name: '', organization: '', email: '', market: '', type: 'one-off' })
 
   useEffect(() => {
     fetch('/api/admin/leads').then(r => r.json()).then(setLeads).finally(() => setLoading(false))
@@ -29,6 +34,24 @@ export default function LeadsPage() {
     (l.organization ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
+  async function addLead(e: React.FormEvent) {
+    e.preventDefault()
+    if (!form.name.trim()) return
+    setSaving(true)
+    const res = await fetch('/api/admin/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, source: 'manual' }),
+    })
+    if (res.ok) {
+      const newLead = await res.json()
+      setLeads(prev => [newLead, ...prev])
+      setForm({ name: '', organization: '', email: '', market: '', type: 'one-off' })
+      setShowModal(false)
+    }
+    setSaving(false)
+  }
+
   if (loading) return <div style={{ color: '#9a7d5a', padding: 40 }}>Loading leads…</div>
 
   return (
@@ -37,12 +60,20 @@ export default function LeadsPage() {
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400 }}>
           All Leads ({leads.length})
         </h1>
-        <input
-          placeholder="Search…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', background: '#fff', width: 200 }}
-        />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <input
+            placeholder="Search…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', background: '#fff', width: 200 }}
+          />
+          <button
+            onClick={() => setShowModal(true)}
+            style={{ padding: '8px 16px', background: 'var(--brown)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
+          >
+            + Add lead
+          </button>
+        </div>
       </div>
 
       <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, overflow: 'hidden' }}>
@@ -82,11 +113,80 @@ export default function LeadsPage() {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: 32, textAlign: 'center', color: '#9a7d5a' }}>No leads yet. Add them from the Pipeline view or via Apollo search.</td></tr>
+              <tr><td colSpan={7} style={{ padding: 32, textAlign: 'center', color: '#9a7d5a' }}>
+                No leads yet. Click &ldquo;+ Add lead&rdquo; to create one, or use Apollo search in Settings.
+              </td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 32, width: 440, boxShadow: '0 8px 40px rgba(0,0,0,0.18)' }}>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--brown)', fontWeight: 400, marginBottom: 20 }}>Add a lead</h2>
+            <form onSubmit={addLead} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Name *</label>
+                <input
+                  required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Jane Smith"
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Organization</label>
+                <input
+                  value={form.organization} onChange={e => setForm(f => ({ ...f, organization: e.target.value }))}
+                  placeholder="Acme Corp"
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Email</label>
+                <input
+                  type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="jane@example.com"
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Market</label>
+                  <select
+                    value={form.market} onChange={e => setForm(f => ({ ...f, market: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, background: '#fff' }}
+                  >
+                    <option value="">Select…</option>
+                    {MARKETS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 12, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Type</label>
+                  <select
+                    value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, background: '#fff' }}
+                  >
+                    <option value="one-off">One-off</option>
+                    <option value="recurring">Recurring</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                <button type="button" onClick={() => setShowModal(false)}
+                  style={{ flex: 1, padding: '10px', border: '1px solid #e5d9c9', borderRadius: 8, background: '#fff', color: '#9a7d5a', fontSize: 13, cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving}
+                  style={{ flex: 1, padding: '10px', border: 'none', borderRadius: 8, background: 'var(--brown)', color: '#fff', fontSize: 13, cursor: 'pointer', fontWeight: 500 }}>
+                  {saving ? 'Adding…' : 'Add lead'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
