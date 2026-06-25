@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.GMAIL_CLIENT_ID!
   const clientSecret = process.env.GMAIL_CLIENT_SECRET!
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://chefnanawilmot.com'}/api/admin/gmail/callback`
+  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.chefnanawilmot.com'}/api/admin/gmail/callback`
 
   // Exchange code for tokens
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

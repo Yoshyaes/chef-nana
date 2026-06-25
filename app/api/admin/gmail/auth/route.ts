@@ -6,7 +6,7 @@ export async function GET() {
     return NextResponse.json({ error: 'GMAIL_CLIENT_ID not configured' }, { status: 503 })
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://chefnanawilmot.com'}/api/admin/gmail/callback`
+  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.chefnanawilmot.com'}/api/admin/gmail/callback`
 
   const params = new URLSearchParams({
     client_id: clientId,
