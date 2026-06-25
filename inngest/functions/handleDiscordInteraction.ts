@@ -46,7 +46,7 @@ export const handleDiscordInteraction = inngest.createFunction(
         })
       }
 
-      const leadName = (draft?.leads as { name: string } | null)?.name ?? 'lead'
+      const leadName = ((draft?.leads as unknown) as { name: string } | null)?.name ?? 'lead'
       await updateInteractionMessage(applicationId, interactionToken, `✗ Draft for **${leadName}** rejected`)
       return { rejected: true }
     }
