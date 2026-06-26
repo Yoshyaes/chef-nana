@@ -91,7 +91,7 @@ export default function TodayPage() {
       ) : (
         <>
           {triage.stats && (
-            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
               {[
                 { label: 'Hot replies', value: triage.stats.hotReplies, color: '#B85A35' },
                 { label: 'Drafts to approve', value: triage.stats.draftsToApprove, color: '#C9973A' },

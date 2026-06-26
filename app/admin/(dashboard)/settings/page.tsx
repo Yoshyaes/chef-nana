@@ -26,6 +26,8 @@ export default function SettingsPage() {
   const [searching, setSearching] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResult, setSearchResult] = useState<{ count: number } | null>(null)
+  const [discordTesting, setDiscordTesting] = useState(false)
+  const [discordTestResult, setDiscordTestResult] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(setSettings)
@@ -220,8 +222,29 @@ export default function SettingsPage() {
       <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginTop: 20 }}>
         <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Discord notifications</div>
         {settings.discordConfigured ? (
-          <div style={{ color: '#2D5F3D', fontSize: 13, fontWeight: 500 }}>
-            ✓ Configured — draft notifications with Approve/Reject buttons will appear in your Discord channel.
+          <div>
+            <div style={{ color: '#2D5F3D', fontSize: 13, fontWeight: 500, marginBottom: 12 }}>
+              ✓ Configured — draft notifications with Approve/Reject buttons will appear in your Discord channel.
+            </div>
+            <button
+              onClick={async () => {
+                setDiscordTesting(true)
+                setDiscordTestResult(null)
+                const res = await fetch('/api/admin/discord/test', { method: 'POST' })
+                const data = await res.json()
+                setDiscordTestResult(res.ok ? '✓ Test notification sent — check your Discord channel' : `✗ ${data.error}`)
+                setDiscordTesting(false)
+              }}
+              disabled={discordTesting}
+              style={{ padding: '8px 16px', background: '#f0e8db', color: 'var(--brown)', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}
+            >
+              {discordTesting ? 'Sending…' : 'Send test notification →'}
+            </button>
+            {discordTestResult && (
+              <div style={{ fontSize: 12, marginTop: 8, color: discordTestResult.startsWith('✓') ? '#2D5F3D' : '#B85A35' }}>
+                {discordTestResult}
+              </div>
+            )}
           </div>
         ) : (
           <div style={{ fontSize: 13, color: '#7a6652', lineHeight: 1.7 }}>
@@ -233,7 +256,7 @@ export default function SettingsPage() {
               <li><code>DISCORD_CHANNEL_ID</code></li>
             </ul>
             Set Interactions Endpoint URL in Discord Developer Portal to{' '}
-            <code>https://chefnanawilmot.com/api/discord/interactions</code>
+            <code>https://www.chefnanawilmot.com/api/discord/interactions</code>
           </div>
         )}
       </section>

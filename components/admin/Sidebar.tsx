@@ -21,7 +21,7 @@ const toolItems = [
   { label: 'Docs', href: '/admin/docs', icon: '?', external: false },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
   const [counts, setCounts] = useState<Counts>({ drafts: 0, leads: 0, tasks: 0 })
   const [spend, setSpend] = useState<{ current: number; cap: number }>({ current: 0, cap: 25 })
@@ -41,9 +41,8 @@ export default function AdminSidebar() {
   const spendPct = Math.min(100, (spend.current / spend.cap) * 100)
 
   return (
-    <aside style={{
+    <aside className={className} style={{
       width: 244,
-      minHeight: '100vh',
       background: '#fff',
       borderRight: '1px solid #eee5d7',
       display: 'flex',

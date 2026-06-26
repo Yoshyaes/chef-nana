@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface VercelDeploy { state: string; created: number; commitMessage: string | null; url: string | null }
 interface VercelData { latest: VercelDeploy | null; recent: VercelDeploy[] }
@@ -60,6 +61,7 @@ function Card({ title, icon, href, hrefLabel, children, unconfigured }: {
 }
 
 export default function IntegrationsPage() {
+  const isMobile = useIsMobile()
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshed, setRefreshed] = useState<Date | null>(null)
@@ -95,7 +97,7 @@ export default function IntegrationsPage() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
 
         {/* Google Analytics */}
         <Card title="Google Analytics" icon="📊" href="https://analytics.google.com" hrefLabel="Open GA4" unconfigured={!data?.ga4}>

@@ -39,7 +39,9 @@ async function fetchGA4() {
   let key: { client_email: string; private_key: string }
   try { key = JSON.parse(keyJson) } catch { return null }
 
-  const token = await getGA4Token(key.client_email, key.private_key)
+  // Vercel double-escapes \n in private keys — normalize before signing
+  const privateKey = key.private_key.replace(/\\n/g, '\n')
+  const token = await getGA4Token(key.client_email, privateKey)
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
   const url = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`
 

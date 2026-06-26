@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface Lead {
   id: string
@@ -68,9 +69,11 @@ function LeadCard({ lead, onStageChange }: { lead: Lead; onStageChange: (id: str
 }
 
 export default function PipelinePage() {
+  const isMobile = useIsMobile()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [mobileStage, setMobileStage] = useState('sourced')
   const [showAddForm, setShowAddForm] = useState(false)
   const [newLead, setNewLead] = useState({ name: '', organization: '', email: '', type: '', market: '' })
 
@@ -98,23 +101,33 @@ export default function PipelinePage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400 }}>Pipeline</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 10 }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: isMobile ? 22 : 26, color: 'var(--brown)', fontWeight: 400 }}>Pipeline</h1>
         <div style={{ display: 'flex', gap: 10 }}>
-          <input
-            placeholder="Search leads…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', background: '#fff', width: 180 }}
-          />
+          {!isMobile && (
+            <input
+              placeholder="Search leads…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ padding: '8px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', background: '#fff', width: 180 }}
+            />
+          )}
           <button
             onClick={() => setShowAddForm(true)}
-            style={{ padding: '8px 16px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
+            style={{ padding: '8px 14px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
           >
             + Add lead
           </button>
         </div>
       </div>
+      {isMobile && (
+        <input
+          placeholder="Search leads…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 14, marginBottom: 16, background: '#fff' }}
+        />
+      )}
 
       {showAddForm && (
         <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 24 }}>
@@ -146,24 +159,59 @@ export default function PipelinePage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, alignItems: 'start' }}>
-        {STAGES.map(stage => {
-          const col = filtered.filter(l => l.stage === stage.key)
-          return (
-            <div key={stage.key}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: stage.color }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--brown)' }}>{stage.label}</span>
-                <span style={{ fontSize: 11, color: '#9a7d5a', marginLeft: 'auto' }}>{col.length}</span>
+      {isMobile ? (
+        <>
+          {/* Mobile: stage tabs + single column */}
+          <div style={{ display: 'flex', gap: 0, overflowX: 'auto', marginBottom: 16, borderBottom: '1px solid #eee5d7', paddingBottom: 0 }}>
+            {STAGES.map(stage => {
+              const count = filtered.filter(l => l.stage === stage.key).length
+              const active = mobileStage === stage.key
+              return (
+                <button
+                  key={stage.key}
+                  onClick={() => setMobileStage(stage.key)}
+                  style={{
+                    padding: '8px 14px', border: 'none', background: 'none', cursor: 'pointer',
+                    fontSize: 12, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap',
+                    color: active ? stage.color : '#9a7d5a',
+                    borderBottom: active ? `2px solid ${stage.color}` : '2px solid transparent',
+                    marginBottom: -1,
+                  }}
+                >
+                  {stage.label} {count > 0 && <span style={{ fontSize: 10, opacity: 0.7 }}>({count})</span>}
+                </button>
+              )
+            })}
+          </div>
+          <div>
+            {filtered.filter(l => l.stage === mobileStage).map(lead => (
+              <LeadCard key={lead.id} lead={lead} onStageChange={handleStageChange} />
+            ))}
+            {filtered.filter(l => l.stage === mobileStage).length === 0 && (
+              <div style={{ padding: 32, textAlign: 'center', color: '#c5b09a', fontSize: 13 }}>No leads in this stage</div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, alignItems: 'start' }}>
+          {STAGES.map(stage => {
+            const col = filtered.filter(l => l.stage === stage.key)
+            return (
+              <div key={stage.key}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: stage.color }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--brown)' }}>{stage.label}</span>
+                  <span style={{ fontSize: 11, color: '#9a7d5a', marginLeft: 'auto' }}>{col.length}</span>
+                </div>
+                <div>
+                  {col.map(lead => <LeadCard key={lead.id} lead={lead} onStageChange={handleStageChange} />)}
+                  {col.length === 0 && <div style={{ fontSize: 12, color: '#c5b09a', padding: '12px 0', textAlign: 'center' }}>—</div>}
+                </div>
               </div>
-              <div>
-                {col.map(lead => <LeadCard key={lead.id} lead={lead} onStageChange={handleStageChange} />)}
-                {col.length === 0 && <div style={{ fontSize: 12, color: '#c5b09a', padding: '12px 0', textAlign: 'center' }}>—</div>}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
