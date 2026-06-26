@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 interface Draft {
   id: string
+  lead_id: string
   subject: string
   body: string
   reasoning: string
@@ -11,6 +12,91 @@ interface Draft {
   channel: string
   created_at: string
   leads: { name: string; organization: string; fit_score: number | null; market: string }
+}
+
+interface Message {
+  id: string
+  direction: string
+  channel: string
+  subject: string | null
+  body: string
+  sent_at: string
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function ThreadPanel({ leadId }: { leadId: string }) {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`/api/admin/messages?leadId=${leadId}`)
+      .then(r => r.json())
+      .then(setMessages)
+      .finally(() => setLoading(false))
+  }, [leadId])
+
+  if (loading) return <div style={{ color: '#9a7d5a', fontSize: 12, padding: '8px 0' }}>Loading thread…</div>
+  if (messages.length === 0) return null
+
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div style={{ fontSize: 11, color: '#9a7d5a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+        Conversation history ({messages.length})
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {messages.map(m => {
+          const isInbound = m.direction === 'inbound'
+          const isExpanded = expanded[m.id]
+          const bodyPreview = m.body.slice(0, 200)
+          const hasMore = m.body.length > 200
+          return (
+            <div key={m.id} style={{
+              borderRadius: 10,
+              border: `1px solid ${isInbound ? '#e5d9c9' : '#d8e8dc'}`,
+              background: isInbound ? '#faf7f3' : '#f4f9f5',
+              padding: '12px 16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
+                    color: isInbound ? '#9a7d5a' : '#2D5F3D',
+                    background: isInbound ? '#f0e8db' : '#e0ede4',
+                    padding: '2px 7px', borderRadius: 4,
+                  }}>
+                    {isInbound ? 'THEIR MESSAGE' : 'NANA'}
+                  </span>
+                  {m.subject && (
+                    <span style={{ fontSize: 12, color: 'var(--brown)', fontWeight: 500 }}>{m.subject}</span>
+                  )}
+                </div>
+                <span style={{ fontSize: 11, color: '#b0a090', whiteSpace: 'nowrap', marginLeft: 12 }}>
+                  {formatDate(m.sent_at)}
+                </span>
+              </div>
+              <div style={{ fontSize: 13, color: '#5c4a38', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                {isExpanded ? m.body : bodyPreview}
+                {hasMore && !isExpanded && '…'}
+              </div>
+              {hasMore && (
+                <button
+                  onClick={() => setExpanded(e => ({ ...e, [m.id]: !e[m.id] }))}
+                  style={{ marginTop: 6, fontSize: 11, color: '#9a7d5a', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {isExpanded ? 'Show less' : 'Show full message'}
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function DraftsPage() {
@@ -21,6 +107,7 @@ export default function DraftsPage() {
   const [editBody, setEditBody] = useState('')
   const [editSubject, setEditSubject] = useState('')
   const [actionLoading, setActionLoading] = useState('')
+  const [showThread, setShowThread] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/drafts').then(r => r.json()).then((d: Draft[]) => {
@@ -34,6 +121,7 @@ export default function DraftsPage() {
     setEditing(false)
     setEditBody(d.body)
     setEditSubject(d.subject)
+    setShowThread(false)
   }
 
   async function handleApprove() {
@@ -86,7 +174,8 @@ export default function DraftsPage() {
 
   return (
     <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 64px)', margin: -32 }}>
-      <div style={{ width: 300, borderRight: '1px solid #eee5d7', overflowY: 'auto', background: '#faf7f3' }}>
+      {/* Sidebar */}
+      <div style={{ width: 300, borderRight: '1px solid #eee5d7', overflowY: 'auto', background: '#faf7f3', flexShrink: 0 }}>
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid #eee5d7' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--brown)', fontWeight: 400 }}>
             Drafts ({drafts.length})
@@ -119,17 +208,37 @@ export default function DraftsPage() {
         ))}
       </div>
 
+      {/* Detail panel */}
       <div style={{ flex: 1, padding: 32, overflowY: 'auto' }}>
         {!selected ? (
           <div style={{ color: '#9a7d5a', fontSize: 14, marginTop: 60, textAlign: 'center' }}>Select a draft to review</div>
         ) : (
           <>
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 2 }}>To</div>
-              <div style={{ fontWeight: 500, color: 'var(--brown)' }}>{selected.leads?.name}</div>
-              <div style={{ fontSize: 13, color: '#9a7d5a' }}>{selected.leads?.organization} · {selected.leads?.market}</div>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 2 }}>To</div>
+                <div style={{ fontWeight: 500, color: 'var(--brown)' }}>{selected.leads?.name}</div>
+                <div style={{ fontSize: 13, color: '#9a7d5a' }}>{selected.leads?.organization} · {selected.leads?.market}</div>
+              </div>
+              {selected.lead_id && (
+                <button
+                  onClick={() => setShowThread(t => !t)}
+                  style={{
+                    fontSize: 12, color: showThread ? '#2D5F3D' : '#9a7d5a',
+                    background: showThread ? '#e8f2ec' : '#f0e8db',
+                    border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 500,
+                  }}
+                >
+                  {showThread ? '▾ Hide thread' : '▸ View thread'}
+                </button>
+              )}
             </div>
 
+            {/* Thread */}
+            {showThread && selected.lead_id && <ThreadPanel leadId={selected.lead_id} />}
+
+            {/* Why this draft */}
             {selected.reasoning && (
               <div style={{ background: '#fffbf4', border: '1px solid #f0e3cc', borderRadius: 10, padding: 16, marginBottom: 20 }}>
                 <div style={{ fontSize: 10, color: '#C9973A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Why this draft</div>
@@ -137,6 +246,7 @@ export default function DraftsPage() {
               </div>
             )}
 
+            {/* Draft body */}
             {editing ? (
               <>
                 <div style={{ marginBottom: 12 }}>
@@ -163,6 +273,7 @@ export default function DraftsPage() {
               </>
             )}
 
+            {/* Actions */}
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               {!editing ? (
                 <>

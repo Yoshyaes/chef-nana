@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await createServiceClient()
   const { data, error } = await supabase
     .from('drafts')
-    .select('*, leads(name, organization, fit_score, market)')
+    .select('*, lead_id, leads(name, organization, fit_score, market)')
     .in('status', ['pending', 'edited'])
     .order('created_at', { ascending: false })
 
