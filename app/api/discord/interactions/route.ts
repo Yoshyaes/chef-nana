@@ -52,12 +52,18 @@ export async function POST(request: NextRequest) {
     const customId = body.data?.custom_id as string
     const applicationId = body.application_id as string
     const interactionToken = body.token as string
+    const discordUser: string =
+      body.member?.user?.global_name ??
+      body.member?.user?.username ??
+      body.user?.global_name ??
+      body.user?.username ??
+      'Nana'
 
     const deferred = NextResponse.json({ type: 6 })
 
     inngest.send({
       name: 'discord/interaction.received',
-      data: { customId, applicationId, interactionToken },
+      data: { customId, applicationId, interactionToken, discordUser },
     }).catch(() => { /* fire-and-forget */ })
 
     return deferred

@@ -5,8 +5,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export const handleDiscordInteraction = inngest.createFunction(
   { id: 'handle-discord-interaction', triggers: [{ event: 'discord/interaction.received' }] },
-  async ({ event }: { event: { data: { customId: string; applicationId: string; interactionToken: string } } }) => {
-    const { customId, applicationId, interactionToken } = event.data
+  async ({ event }: { event: { data: { customId: string; applicationId: string; interactionToken: string; discordUser?: string } } }) => {
+    const { customId, applicationId, interactionToken, discordUser = 'Nana' } = event.data
 
     if (customId.startsWith('approve_draft_')) {
       const draftId = customId.replace('approve_draft_', '')
@@ -47,7 +47,7 @@ export const handleDiscordInteraction = inngest.createFunction(
       }
 
       const leadName = ((draft?.leads as unknown) as { name: string } | null)?.name ?? 'lead'
-      await updateInteractionMessage(applicationId, interactionToken, `✗ Draft for **${leadName}** rejected`)
+      await updateInteractionMessage(applicationId, interactionToken, `✗ Draft for **${leadName}** rejected by **${discordUser}**`)
       return { rejected: true }
     }
 

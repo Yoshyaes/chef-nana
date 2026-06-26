@@ -31,17 +31,34 @@ async function getGA4Token(email: string, privateKey: string): Promise<string> {
   return data.access_token
 }
 
-async function fetchGA4() {
+async function fetchGA4(): Promise<
+  | { last7Days: { pageViews: number; sessions: number; activeUsers: number }; last30Days: { pageViews: number; sessions: number } }
+  | { configError: string }
+  | null
+> {
   const propertyId = process.env.GA4_PROPERTY_ID
   const keyJson = process.env.GA4_SERVICE_ACCOUNT_KEY
-  if (!propertyId || !keyJson) return null
+  if (!propertyId && !keyJson) return { configError: 'Add GA4_PROPERTY_ID and GA4_SERVICE_ACCOUNT_KEY to Vercel env vars' }
+  if (!propertyId) return { configError: 'GA4_PROPERTY_ID env var is missing' }
+  if (!keyJson) return { configError: 'GA4_SERVICE_ACCOUNT_KEY env var is missing' }
 
   let key: { client_email: string; private_key: string }
-  try { key = JSON.parse(keyJson) } catch { return null }
+  try { key = JSON.parse(keyJson) } catch { return { configError: 'GA4_SERVICE_ACCOUNT_KEY is not valid JSON — paste the full service account file contents' } }
+
+  if (!key.private_key) return { configError: 'GA4_SERVICE_ACCOUNT_KEY JSON is missing private_key field' }
+  if (!key.client_email) return { configError: 'GA4_SERVICE_ACCOUNT_KEY JSON is missing client_email field' }
 
   // Vercel double-escapes \n in private keys — normalize before signing
   const privateKey = key.private_key.replace(/\\n/g, '\n')
-  const token = await getGA4Token(key.client_email, privateKey)
+
+  let token: string
+  try {
+    token = await getGA4Token(key.client_email, privateKey)
+    if (!token) return { configError: 'Google OAuth returned no access token — check service account permissions' }
+  } catch (e) {
+    return { configError: `Google auth failed: ${e instanceof Error ? e.message : String(e)}` }
+  }
+
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
   const url = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`
 
@@ -62,7 +79,14 @@ async function fetchGA4() {
     }),
   ])
 
-  if (!res7.ok || !res30.ok) return null
+  if (!res7.ok) {
+    const errBody = await res7.text().catch(() => '')
+    const msg = errBody.includes('PERMISSION_DENIED') ? 'Service account lacks GA4 access — add it as a Viewer in GA4 Property Settings' :
+      errBody.includes('NOT_FOUND') ? `Property ID ${propertyId} not found — check GA4_PROPERTY_ID` :
+      `GA4 API error ${res7.status}: ${errBody.slice(0, 120)}`
+    return { configError: msg }
+  }
+
   const [d7, d30] = await Promise.all([res7.json(), res30.json()])
 
   const vals = (d: { rows?: { metricValues: { value: string }[] }[] }) =>
@@ -151,9 +175,13 @@ export async function GET() {
     fetchEmails(),
   ])
 
+  const ga4Value = ga4.status === 'fulfilled' ? ga4.value : null
+  const isGA4Error = ga4Value && typeof ga4Value === 'object' && 'configError' in ga4Value
+
   return NextResponse.json({
     vercel: vercel.status === 'fulfilled' ? vercel.value : null,
-    ga4: ga4.status === 'fulfilled' ? ga4.value : null,
+    ga4: isGA4Error ? null : ga4Value,
+    ga4Error: isGA4Error ? (ga4Value as { configError: string }).configError : null,
     sanity: sanity.status === 'fulfilled' ? sanity.value : null,
     emails: emails.status === 'fulfilled' ? emails.value : null,
   })

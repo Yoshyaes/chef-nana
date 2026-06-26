@@ -12,7 +12,7 @@ interface GA4Data {
 }
 interface SanityData { events: number; services: number; credentials: number; press: number }
 interface EmailData { sentThisMonth: number; totalSent: number; pendingDrafts: number }
-interface Data { vercel: VercelData | null; ga4: GA4Data | null; sanity: SanityData | null; emails: EmailData | null }
+interface Data { vercel: VercelData | null; ga4: GA4Data | null; ga4Error: string | null; sanity: SanityData | null; emails: EmailData | null }
 
 function stateColor(s: string) {
   return s === 'READY' ? '#2D5F3D' : s === 'ERROR' || s === 'FAILED' ? '#B85A35' : s === 'BUILDING' ? '#C9973A' : '#9a7d5a'
@@ -37,9 +37,9 @@ function StatBox({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-function Card({ title, icon, href, hrefLabel, children, unconfigured }: {
+function Card({ title, icon, href, hrefLabel, children, unconfigured, configError }: {
   title: string; icon: string; href: string; hrefLabel: string
-  children?: React.ReactNode; unconfigured?: boolean
+  children?: React.ReactNode; unconfigured?: boolean; configError?: string
 }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24 }}>
@@ -52,8 +52,8 @@ function Card({ title, icon, href, hrefLabel, children, unconfigured }: {
           style={{ fontSize: 12, color: 'var(--gold)', textDecoration: 'none' }}>{hrefLabel} ↗</a>
       </div>
       {unconfigured ? (
-        <div style={{ fontSize: 13, color: '#9a7d5a', background: '#faf7f2', borderRadius: 8, padding: '10px 14px' }}>
-          Not configured — add environment variables to enable.
+        <div style={{ fontSize: 13, color: configError ? '#B85A35' : '#9a7d5a', background: configError ? '#fdf2f0' : '#faf7f2', borderRadius: 8, padding: '10px 14px' }}>
+          {configError ?? 'Not configured — add environment variables to enable.'}
         </div>
       ) : children}
     </div>
@@ -100,7 +100,7 @@ export default function IntegrationsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
 
         {/* Google Analytics */}
-        <Card title="Google Analytics" icon="📊" href="https://analytics.google.com" hrefLabel="Open GA4" unconfigured={!data?.ga4}>
+        <Card title="Google Analytics" icon="📊" href="https://analytics.google.com" hrefLabel="Open GA4" unconfigured={!data?.ga4} configError={data?.ga4Error ?? undefined}>
           {data?.ga4 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>

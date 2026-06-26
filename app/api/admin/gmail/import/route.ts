@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getGmailAccessToken } from '@/lib/gmail'
+import { inngest } from '@/inngest/client'
 
 function parseSender(from: string): { name: string; email: string } | null {
   // RFC 2822: "Display Name" <email@example.com> or just email@example.com
@@ -104,7 +105,15 @@ export async function POST() {
     }))
 
   if (toInsert.length > 0) {
-    await supabase.from('leads').insert(toInsert)
+    const { data: inserted } = await supabase.from('leads').insert(toInsert).select('id')
+    // Trigger AI research for each new lead (fills org, fit score, value/yr via Apollo + Claude)
+    if (inserted && inserted.length > 0) {
+      await Promise.all(
+        inserted.map(row =>
+          inngest.send({ name: 'lead/research.requested', data: { leadId: row.id } }).catch(() => {})
+        )
+      )
+    }
   }
 
   return NextResponse.json({
