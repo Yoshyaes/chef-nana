@@ -16,6 +16,7 @@ const navItems = [
 
 const toolItems = [
   { label: 'Content', href: '/admin/content', icon: '✐', external: false },
+  { label: 'Menus', href: '/admin/menus', icon: '◫', external: false },
   { label: 'Integrations', href: '/admin/integrations', icon: '⊞', external: false },
   { label: 'Settings', href: '/admin/settings', icon: '⚙', external: false },
   { label: 'Docs', href: '/admin/docs', icon: '?', external: false },
@@ -109,7 +110,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
           Tools
         </div>
         {toolItems.map(item => {
-          const active = pathname === item.href
+          const active = pathname === item.href || pathname.startsWith(item.href + '/')
           return (
             <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
               <div style={{
