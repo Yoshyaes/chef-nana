@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useCurrentProfile } from '@/hooks/useCurrentProfile'
+import { createClient } from '@/lib/supabase/client'
 
 interface Counts { drafts: number; leads: number; tasks: number }
 
@@ -26,6 +28,13 @@ export default function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
   const [counts, setCounts] = useState<Counts>({ drafts: 0, leads: 0, tasks: 0 })
   const [spend, setSpend] = useState<{ current: number; cap: number }>({ current: 0, cap: 25 })
+  const { profile } = useCurrentProfile()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = '/admin/login'
+  }
 
   useEffect(() => {
     fetch('/api/admin/settings')
@@ -157,14 +166,32 @@ export default function AdminSidebar({ className }: { className?: string }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
           <div style={{
             width: 32, height: 32, borderRadius: '50%',
-            background: 'var(--gold)', color: '#fff',
+            background: profile?.avatar_color ?? 'var(--gold)', color: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13, fontWeight: 600,
-          }}>N</div>
-          <div>
-            <div style={{ fontSize: 13, color: 'var(--brown)', fontWeight: 500 }}>Nana Wilmot</div>
-            <div style={{ fontSize: 11, color: '#9a7d5a' }}>Chef · Owner</div>
+            fontSize: 13, fontWeight: 600, flexShrink: 0,
+          }}>{profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : '?'}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, color: 'var(--brown)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {profile?.full_name ?? '...'}
+            </div>
+            <div style={{ fontSize: 11, color: '#9a7d5a', textTransform: 'capitalize' }}>
+              {profile?.role ?? ''}
+            </div>
           </div>
+          <button
+            onClick={handleSignOut}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#9a7d5a',
+              fontSize: 11,
+              cursor: 'pointer',
+              padding: '4px 2px',
+              flexShrink: 0,
+            }}
+          >
+            Sign out
+          </button>
         </div>
       </div>
     </aside>
