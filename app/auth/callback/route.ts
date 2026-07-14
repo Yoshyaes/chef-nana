@@ -3,12 +3,6 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const ALLOWED_EMAILS = [
-  'georginasfoods@gmail.com',
-  'soon2b@gmail.com',
-  'nana.wilmot@gmail.com',
-]
-
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -38,11 +32,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/admin/login?error=auth_failed`)
   }
 
-  const email = (data.user.email ?? '').toLowerCase()
-  if (!ALLOWED_EMAILS.includes(email)) {
-    await supabase.auth.signOut()
-    return NextResponse.redirect(`${origin}/admin/login?error=unauthorized`)
-  }
-
+  // Authorization (does this person have a profile row) is enforced by
+  // middleware on the request that follows this redirect, not here. A
+  // signed-in user with no profile row bounces back to
+  // /admin/login?error=unauthorized before any admin content loads.
   return NextResponse.redirect(`${origin}${next}`)
 }
