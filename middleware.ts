@@ -57,6 +57,34 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // A session alone is no longer enough, a matching profiles row is required
+  // too. Checked with the service role rather than the user-scoped client
+  // above, so this does not depend on the profiles RLS policy, matching how
+  // every other read in this app defaults to the service role.
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (serviceRoleKey) {
+    const serviceClient = createServerClient(supabaseUrl, serviceRoleKey, {
+      cookies: { getAll: () => [], setAll: () => {} },
+    })
+
+    const { data: profile } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!profile) {
+      await supabase.auth.signOut()
+
+      const loginUrl = new URL('/admin/login', request.url)
+      loginUrl.searchParams.set('error', 'unauthorized')
+      const redirectResponse = NextResponse.redirect(loginUrl)
+      response.cookies.getAll().forEach(cookie => redirectResponse.cookies.set(cookie))
+      return redirectResponse
+    }
+  }
+
   return response
 }
 
