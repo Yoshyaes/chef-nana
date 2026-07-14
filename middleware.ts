@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (!pathname.startsWith('/admin')) {
+  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
     return NextResponse.next()
   }
 
@@ -89,5 +89,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/admin/:path*', '/auth/:path*', '/api/admin/gmail/:path*'],
+  matcher: ['/', '/admin/:path*', '/auth/:path*', '/api/admin/:path*'],
 }
