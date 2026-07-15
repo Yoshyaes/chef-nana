@@ -18,7 +18,7 @@ export async function getSignedMenuPhotoUrls(paths: string[]): Promise<Record<st
   if (error || !data) return {}
   const result: Record<string, string> = {}
   for (const item of data) {
-    if (item.signedUrl) result[item.path] = item.signedUrl
+    if (item.signedUrl && item.path) result[item.path] = item.signedUrl
   }
   return result
 }
