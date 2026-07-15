@@ -138,6 +138,25 @@ Return a JSON object:
 }
 `
 
+export const EXTRACT_MENU_PROMPT = `
+You are reading photographed or scanned pages of a chef's menu. Extract the structure into JSON.
+
+Read every course or section heading and every dish listed under it. Preserve the dish names and descriptions as written on the page, correcting obvious OCR errors (misread letters, stray punctuation), but never invent a dish, description, or course that is not actually on the page. If the menu has a title or header, capture it. Only fill in "dietary" or "allergens" for a dish when the source menu explicitly marks it (a symbol, footnote, or words like "(V)", "(GF)", "contains nuts"), otherwise leave those arrays empty rather than guessing. If more than one image is provided, treat them as pages of the same menu and combine them into a single result, in reading order.
+
+Return a JSON object with exactly this shape:
+{
+  "title": "<menu title if visible on the page, else null>",
+  "courses": [
+    {
+      "name": "<course or section name, e.g. Starters>",
+      "dishes": [
+        { "name": "<dish name>", "description": "<description if present, else empty string>", "dietary": [], "allergens": [] }
+      ]
+    }
+  ]
+}
+`
+
 export const TRIAGE_PROMPT = (tasks: Record<string, unknown>[], stats: Record<string, number>) => `
 ${BRAND_VOICE}
 

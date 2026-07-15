@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import CourseDishRepeater from './CourseDishRepeater'
 import PhotoUploader from './PhotoUploader'
+import MenuPhotoExtractor from './MenuPhotoExtractor'
 
 const OCCASIONS = ['private_dinner', 'catering', 'corporate', 'supper_club', 'holiday']
 const CUISINES = ['Ghanaian', 'West African', 'Mediterranean', 'American', 'Pan-African', 'International']
@@ -70,6 +71,11 @@ export default function MenuEditor({ initialData, onSave, onCancel, saving }: Pr
     e.preventDefault()
     if (!form.title.trim()) return
     await onSave(form)
+  }
+
+  function handleExtracted({ title, courses }: { title: string | null; courses: Course[] }) {
+    set('courses', form.courses.length === 0 ? courses : [...form.courses, ...courses])
+    if (!form.title.trim() && title) set('title', title)
   }
 
   const inputStyle = {
@@ -230,19 +236,24 @@ export default function MenuEditor({ initialData, onSave, onCancel, saving }: Pr
       {/* Divider */}
       <div style={{ borderTop: '1px solid #eee5d7' }} />
 
-      {/* Courses */}
-      <CourseDishRepeater
-        courses={form.courses}
-        onChange={courses => set('courses', courses)}
+      {/* Photos */}
+      <PhotoUploader
+        photos={form.source_photos}
+        onChange={photos => set('source_photos', photos)}
+      />
+
+      <MenuPhotoExtractor
+        photos={form.source_photos}
+        onExtracted={handleExtracted}
       />
 
       {/* Divider */}
       <div style={{ borderTop: '1px solid #eee5d7' }} />
 
-      {/* Photos */}
-      <PhotoUploader
-        photos={form.source_photos}
-        onChange={photos => set('source_photos', photos)}
+      {/* Courses */}
+      <CourseDishRepeater
+        courses={form.courses}
+        onChange={courses => set('courses', courses)}
       />
 
       {/* Actions */}

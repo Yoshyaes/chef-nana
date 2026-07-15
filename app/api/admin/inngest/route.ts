@@ -7,6 +7,7 @@ import {
   checkGmailInbox,
   handleInboundEmail,
   handleDiscordInteraction,
+  extractMenuPhotos,
 } from '@/inngest/functions'
 
 export const { GET, POST, PUT } = serve({
@@ -18,5 +19,6 @@ export const { GET, POST, PUT } = serve({
     checkGmailInbox,
     handleInboundEmail,
     handleDiscordInteraction,
+    extractMenuPhotos,
   ],
 })

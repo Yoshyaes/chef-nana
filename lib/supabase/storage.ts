@@ -22,3 +22,12 @@ export async function getSignedMenuPhotoUrls(paths: string[]): Promise<Record<st
   }
   return result
 }
+
+export async function downloadMenuPhotoBytes(path: string): Promise<Buffer | null> {
+  const supabase = await createServiceClient()
+  const { data, error } = await supabase.storage
+    .from('menu-photos')
+    .download(path)
+  if (error || !data) return null
+  return Buffer.from(await data.arrayBuffer())
+}
