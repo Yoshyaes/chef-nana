@@ -64,22 +64,33 @@ export const dailyTriage = inngest.createFunction(
 
     const response = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: 1024,
+      max_tokens: 4096,
       messages: [{ role: 'user', content: TRIAGE_PROMPT(tasks ?? [], stats) }],
     })
 
     await updateMonthlySpend(response.usage.input_tokens, response.usage.output_tokens, 0, MODEL)
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
-    let parsed: { tldr?: string; actions?: unknown[] } = {}
+    let parsed: { tldr?: string; actions?: unknown[] } | null = null
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) parsed = JSON.parse(jsonMatch[0])
-    } catch { /* use raw */ }
+      if (jsonMatch) {
+        const candidate = JSON.parse(jsonMatch[0])
+        if (typeof candidate.tldr === 'string') parsed = candidate
+      }
+    } catch { /* handled below */ }
+
+    if (response.stop_reason === 'max_tokens' || !parsed) {
+      console.error('dailyTriage: failed to produce a usable brief', {
+        stopReason: response.stop_reason,
+        textPreview: text.slice(0, 500),
+      })
+      return { stats, triageGenerated: false, error: 'Model response was truncated or unparsable' }
+    }
 
     await supabase.from('settings').update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      latest_triage: { tldr: parsed.tldr ?? text, actions: parsed.actions ?? [], stats, generated_at: new Date().toISOString() } as any,
+      latest_triage: { tldr: parsed.tldr, actions: parsed.actions ?? [], stats, generated_at: new Date().toISOString() } as any,
       updated_at: new Date().toISOString(),
     }).neq('id', '00000000-0000-0000-0000-000000000000')
 
