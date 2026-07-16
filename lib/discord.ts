@@ -17,26 +17,24 @@ interface InboundContext {
   body: string
 }
 
-export async function sendDraftNotification(
+export function buildDraftEmbed(
   draft: Draft,
   lead: Lead,
-  inbound?: InboundContext
-): Promise<string | null> {
-  const token = process.env.DISCORD_BOT_TOKEN
-  const channelId = process.env.DISCORD_CHANNEL_ID
-  if (!token || !channelId) return null
-
+  opts?: { inbound?: InboundContext; edited?: boolean }
+): { embed: Record<string, unknown>; components: Record<string, unknown>[] } {
   const bodyPreview = draft.body.slice(0, 400) + (draft.body.length > 400 ? '…' : '')
-  const isReply = !!inbound
+  const isReply = !!opts?.inbound
 
-  const description = isReply
-    ? `**Incoming message:** ${inbound!.subject}\n\n**Proposed reply:**\n${bodyPreview}`
+  const description = opts?.inbound
+    ? `**Incoming message:** ${opts.inbound.subject}\n\n**Proposed reply:**\n${bodyPreview}`
     : bodyPreview
 
   const embed = {
-    title: isReply
-      ? `↩ Reply ready — ${lead.name}`
-      : `✉ Draft ready — ${lead.name}`,
+    title: opts?.edited
+      ? `✏ Draft updated — ${lead.name}`
+      : isReply
+        ? `↩ Reply ready — ${lead.name}`
+        : `✉ Draft ready — ${lead.name}`,
     description,
     color: isReply ? 0xC9973A : 0x2D5F3D,
     fields: [
@@ -47,23 +45,45 @@ export async function sendDraftNotification(
     footer: { text: 'chefnanawilmot.com/admin' },
   }
 
+  const components = [
+    {
+      type: 1,
+      components: [
+        { type: 2, style: 3, label: 'Approve ✓', custom_id: `approve_draft_${draft.id}` },
+        { type: 2, style: 4, label: 'Reject ✗', custom_id: `reject_draft_${draft.id}` },
+        { type: 2, style: 2, label: 'Edit ✎', custom_id: `edit_draft_${draft.id}` },
+      ],
+    },
+    {
+      type: 1,
+      components: [
+        { type: 2, style: 2, label: 'Coach 🎓', custom_id: `coach_draft_${draft.id}` },
+        { type: 2, style: 5, label: 'View in Admin →', url: `https://chefnanawilmot.com/admin/drafts/${draft.id}` },
+      ],
+    },
+  ]
+
+  return { embed, components }
+}
+
+export async function sendDraftNotification(
+  draft: Draft,
+  lead: Lead,
+  inbound?: InboundContext
+): Promise<string | null> {
+  const token = process.env.DISCORD_BOT_TOKEN
+  const channelId = process.env.DISCORD_CHANNEL_ID
+  if (!token || !channelId) return null
+
+  const { embed, components } = buildDraftEmbed(draft, lead, { inbound })
+
   const res = await fetch(`${DISCORD_API}/channels/${channelId}/messages`, {
     method: 'POST',
     headers: {
       Authorization: `Bot ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      embeds: [embed],
-      components: [{
-        type: 1,
-        components: [
-          { type: 2, style: 3, label: 'Approve ✓', custom_id: `approve_draft_${draft.id}` },
-          { type: 2, style: 4, label: 'Reject ✗',  custom_id: `reject_draft_${draft.id}` },
-          { type: 2, style: 5, label: 'View in Admin →', url: `https://chefnanawilmot.com/admin/drafts/${draft.id}` },
-        ],
-      }],
-    }),
+    body: JSON.stringify({ embeds: [embed], components }),
   })
 
   if (!res.ok) {
@@ -74,7 +94,8 @@ export async function sendDraftNotification(
   return (data.id ?? null) as string | null
 }
 
-// Update the original interaction message after approve/reject
+// Collapse the original message to a plain-text confirmation — used for terminal
+// actions (approve/reject) where there's nothing left to act on.
 // Uses the interaction token (not bot token) — no Authorization header needed for webhook API
 export async function updateInteractionMessage(
   applicationId: string,
@@ -89,4 +110,32 @@ export async function updateInteractionMessage(
       body: JSON.stringify({ content, embeds: [], components: [] }),
     }
   )
+}
+
+// Re-render the original message with an updated embed — used after an edit, so the
+// draft stays actionable (Approve/Reject/Edit/Coach remain clickable).
+export async function updateInteractionEmbed(
+  applicationId: string,
+  interactionToken: string,
+  embed: Record<string, unknown>,
+  components: Record<string, unknown>[]
+): Promise<void> {
+  await fetch(
+    `${DISCORD_API}/webhooks/${applicationId}/${interactionToken}/messages/@original`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed], components }),
+    }
+  )
+}
+
+// Appends a dated coaching note and trims from the oldest end so the notes block
+// (which gets injected into every future draft/reply prompt) can't grow unbounded.
+export function appendVoiceNote(existing: string | null | undefined, note: string, maxLen = 3000): string {
+  const stamp = new Date().toISOString().slice(0, 10)
+  const lines = (existing ?? '').split('\n').filter(Boolean)
+  lines.push(`- [${stamp}] ${note}`)
+  while (lines.join('\n').length > maxLen && lines.length > 1) lines.shift()
+  return lines.join('\n')
 }

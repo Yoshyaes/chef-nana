@@ -139,11 +139,11 @@ export default function SettingsPage() {
 
         <section style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 4 }}>Your voice</div>
-          <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 10 }}>Any additional notes on tone, things to always or never say, or context about your current focus.</div>
+          <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 10 }}>Any additional notes on tone, things to always or never say, or context about your current focus. Notes you add via the Discord &quot;Coach&quot; button land here too — edit or delete any line to stop applying it.</div>
           <textarea
             value={settings.brand_voice_notes}
             onChange={e => setSettings(p => p ? { ...p, brand_voice_notes: e.target.value } : p)}
-            rows={3}
+            rows={6}
             placeholder="e.g. I'm focused on Hamptons families right now. Don't pitch corporate events unless they reach out first."
             style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, color: 'var(--brown)', lineHeight: 1.6, resize: 'vertical', fontFamily: 'inherit' }}
           />
