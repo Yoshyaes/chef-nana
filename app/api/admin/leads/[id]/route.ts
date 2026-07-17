@@ -37,6 +37,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createServiceClient()
+
+  // These tables were created directly against the live database with no guaranteed
+  // FK cascade, so clean up dependent rows explicitly before removing the lead.
+  await Promise.all([
+    supabase.from('drafts').delete().eq('lead_id', id),
+    supabase.from('messages').delete().eq('lead_id', id),
+    supabase.from('tasks').delete().eq('lead_id', id),
+    supabase.from('activity_log').delete().eq('lead_id', id),
+    supabase.from('enrichment').delete().eq('lead_id', id),
+  ])
+
   const { error } = await supabase.from('leads').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ deleted: true })

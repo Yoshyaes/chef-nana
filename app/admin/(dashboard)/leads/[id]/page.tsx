@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface Lead { id: string; name: string; organization: string; type: string; market: string; email: string | null; linkedin_url: string | null; fit_score: number | null; est_annual_value: number | null; stage: string; is_recurring: boolean }
@@ -13,6 +13,7 @@ const STAGES = ['sourced', 'contacted', 'responded', 'negotiating', 'won', 'lost
 
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
   const [lead, setLead] = useState<Lead | null>(null)
   const [enrichment, setEnrichment] = useState<Enrichment[]>([])
   const [messages, setMessages] = useState<Message[]>([])
@@ -20,6 +21,7 @@ export default function LeadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [researching, setResearching] = useState(false)
   const [drafting, setDrafting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetch(`/api/admin/leads/${id}`)
@@ -50,6 +52,14 @@ export default function LeadDetailPage() {
   async function handleStageChange(stage: string) {
     await fetch(`/api/admin/leads/${id}/stage`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage }) })
     setLead(prev => prev ? { ...prev, stage } : null)
+  }
+
+  async function handleDelete() {
+    if (!lead) return
+    if (!confirm(`Delete ${lead.name}? This permanently removes all of their drafts, messages, and activity history. This can't be undone.`)) return
+    setDeleting(true)
+    await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' })
+    router.push('/admin/leads')
   }
 
   const research = enrichment.find(e => e.provider === 'claude')
@@ -160,6 +170,13 @@ export default function LeadDetailPage() {
                 Review draft →
               </Link>
             )}
+
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #eee5d7' }}>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ width: '100%', padding: '8px 12px', background: 'transparent', color: '#B85A35', border: '1px solid #f0d5cc', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
+                {deleting ? 'Deleting…' : 'Delete lead'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
