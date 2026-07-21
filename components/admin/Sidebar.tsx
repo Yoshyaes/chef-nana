@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Pipeline', href: '/admin/pipeline', icon: '⟳', countKey: 'leads' as keyof Counts },
   { label: 'Drafts', href: '/admin/drafts', icon: '✦', countKey: 'drafts' as keyof Counts },
   { label: 'Leads', href: '/admin/leads', icon: '◈', countKey: null },
+  { label: 'Tasks', href: '/admin/tasks', icon: '☑', countKey: null },
   { label: 'Sequences', href: '/admin/sequences', icon: '→', countKey: null },
 ]
 
