@@ -27,14 +27,6 @@ export async function GET(req: NextRequest) {
   let sent = 0
 
   for (const profile of profiles) {
-    const { data: alreadySent } = await supabase
-      .from('task_digest_log')
-      .select('user_id')
-      .eq('user_id', profile.id)
-      .eq('sent_on', today)
-      .maybeSingle()
-    if (alreadySent) continue
-
     const { data: overdue } = await supabase
       .from('team_tasks')
       .select('id, title, due_date')
@@ -53,6 +45,17 @@ export async function GET(req: NextRequest) {
     const overdueList = overdue ?? []
     const dueTodayList = dueToday ?? []
     if (overdueList.length === 0 && dueTodayList.length === 0) continue
+
+    // Claim this user's digest for today before sending, not after. The
+    // (user_id, sent_on) primary key makes this insert the concurrency
+    // guard: if a second, overlapping invocation (a retried cron trigger,
+    // or a manual re-hit while a run is in flight) reaches this same user,
+    // its insert fails on the unique constraint and it skips, instead of
+    // both invocations sending the same digest email.
+    const { error: claimError } = await supabase
+      .from('task_digest_log')
+      .insert({ user_id: profile.id, sent_on: today })
+    if (claimError) continue
 
     const { data: { user } } = await supabase.auth.admin.getUserById(profile.id)
     if (!user?.email) continue
@@ -80,7 +83,6 @@ export async function GET(req: NextRequest) {
       continue
     }
 
-    await supabase.from('task_digest_log').insert({ user_id: profile.id, sent_on: today })
     sent++
   }
 
