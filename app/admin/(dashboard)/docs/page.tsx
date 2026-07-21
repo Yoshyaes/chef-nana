@@ -212,7 +212,7 @@ export default function DocsPage() {
               ['Writing examples', 'Paste 3–5 real sent emails. The single most impactful voice tuning you can do.'],
               ['Approve before sending', 'Always leave this on. Nothing sends without a human touch.'],
               ['Gmail', 'OAuth connection to georginasfoods@gmail.com. Reconnect if it ever shows disconnected.'],
-              ['Discord', 'Requires DISCORD_BOT_TOKEN + DISCORD_CHANNEL_ID in Vercel. Shows draft notifications with Approve/Reject buttons. Add DISCORD_NANA_USER_ID + DISCORD_JULIAN_USER_ID to @-mention them so new drafts ping their devices.'],
+              ['Discord', 'Requires DISCORD_BOT_TOKEN + DISCORD_CHANNEL_ID in Vercel. Shows draft notifications with Approve/Reject buttons. Add DISCORD_NANA_USER_ID + DISCORD_JILLIAN_USER_ID to @-mention them so new drafts ping their devices.'],
               ['Sending domain', 'Emails send from nana@mail.chefnanawilmot.com. Only change this if the domain changes.'],
             ].map(([setting, desc]) => (
               <tr key={setting} style={{ borderBottom: '1px solid #f0e8db' }}>

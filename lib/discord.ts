@@ -69,7 +69,7 @@ export function buildDraftEmbed(
 // Pings ring a device even when the channel is muted; a plain embed does not.
 // Read at call time (not module load) so tests can set env vars per-case.
 function draftMentionContent(): { content?: string; allowed_mentions?: { users: string[] } } {
-  const ids = [process.env.DISCORD_NANA_USER_ID, process.env.DISCORD_JULIAN_USER_ID].filter(
+  const ids = [process.env.DISCORD_NANA_USER_ID, process.env.DISCORD_JILLIAN_USER_ID].filter(
     (id): id is string => !!id
   )
   if (!ids.length) return {}

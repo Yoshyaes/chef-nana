@@ -227,8 +227,8 @@ export default function SettingsPage() {
               ✓ Configured — draft notifications with Approve/Reject buttons will appear in your Discord channel.
             </div>
             <div style={{ fontSize: 12, color: '#9a7d5a', marginBottom: 12 }}>
-              To @-mention Nana and Julian on every new draft (so it pings their devices),
-              add <code>DISCORD_NANA_USER_ID</code> and <code>DISCORD_JULIAN_USER_ID</code> to
+              To @-mention Nana and Jillian on every new draft (so it pings their devices),
+              add <code>DISCORD_NANA_USER_ID</code> and <code>DISCORD_JILLIAN_USER_ID</code> to
               Vercel (right-click their name in Discord with Developer Mode on → Copy User ID).
             </div>
             <button
@@ -260,7 +260,7 @@ export default function SettingsPage() {
               <li><code>DISCORD_APPLICATION_ID</code></li>
               <li><code>DISCORD_CHANNEL_ID</code></li>
               <li><code>DISCORD_NANA_USER_ID</code> <em>(optional, @-mentions Nana on new drafts)</em></li>
-              <li><code>DISCORD_JULIAN_USER_ID</code> <em>(optional, @-mentions Julian on new drafts)</em></li>
+              <li><code>DISCORD_JILLIAN_USER_ID</code> <em>(optional, @-mentions Jillian on new drafts)</em></li>
             </ul>
             Set Interactions Endpoint URL in Discord Developer Portal to{' '}
             <code>https://www.chefnanawilmot.com/api/discord/interactions</code>
