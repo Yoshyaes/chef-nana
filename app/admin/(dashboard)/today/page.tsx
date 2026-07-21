@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { localDateString } from '@/lib/dates'
 
 interface DueTodayTask {
   id: string
@@ -61,7 +62,7 @@ export default function TodayPage() {
     fetch('/api/admin/tasks?view=mine')
       .then(r => r.ok ? r.json() : [])
       .then((tasks: { id: string; title: string; priority: string; due_date: string | null }[]) => {
-        const today = new Date().toISOString().slice(0, 10)
+        const today = localDateString()
         setDueToday(tasks.filter(t => t.due_date === today) as DueTodayTask[])
       })
       .catch(() => {})

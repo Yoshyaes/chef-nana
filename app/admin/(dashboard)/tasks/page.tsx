@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCurrentProfile } from '@/hooks/useCurrentProfile'
+import { localDateString } from '@/lib/dates'
 
 interface Profile { id: string; full_name: string; role: string; avatar_color: string }
 interface Task {
@@ -23,7 +24,7 @@ const TABS = [
 ] as const
 
 const PRIORITY_COLORS: Record<string, string> = { low: '#9a7d5a', medium: '#C9973A', high: '#B85A35' }
-const today = () => new Date().toISOString().slice(0, 10)
+const today = () => localDateString()
 
 export default function TasksPage() {
   const { profile: me } = useCurrentProfile()
