@@ -60,8 +60,12 @@ export async function middleware(request: NextRequest) {
   // A session alone is no longer enough, a matching profiles row is required
   // too. Checked with the service role rather than the user-scoped client
   // above, so this does not depend on the profiles RLS policy, matching how
-  // every other read in this app defaults to the service role.
+  // every other read in this app defaults to the service role. Fails closed:
+  // if the service role key is missing, that is a misconfiguration, not a
+  // reason to let an unauthorized session through, so it is treated the same
+  // as "no matching profile."
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  let hasProfile = false
 
   if (serviceRoleKey) {
     const serviceClient = createServerClient(supabaseUrl, serviceRoleKey, {
@@ -74,15 +78,17 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .maybeSingle()
 
-    if (!profile) {
-      await supabase.auth.signOut()
+    hasProfile = !!profile
+  }
 
-      const loginUrl = new URL('/admin/login', request.url)
-      loginUrl.searchParams.set('error', 'unauthorized')
-      const redirectResponse = NextResponse.redirect(loginUrl)
-      response.cookies.getAll().forEach(cookie => redirectResponse.cookies.set(cookie))
-      return redirectResponse
-    }
+  if (!hasProfile) {
+    await supabase.auth.signOut()
+
+    const loginUrl = new URL('/admin/login', request.url)
+    loginUrl.searchParams.set('error', 'unauthorized')
+    const redirectResponse = NextResponse.redirect(loginUrl)
+    response.cookies.getAll().forEach(cookie => redirectResponse.cookies.set(cookie))
+    return redirectResponse
   }
 
   return response
