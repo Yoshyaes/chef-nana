@@ -10,14 +10,14 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   const { id } = await params
   const supabase = await createServiceClient()
 
-  const { data, error } = await supabase
-    .from('team_tasks')
-    .select('*, lead:leads(id, name), menu:menus(id, title)')
-    .eq('id', id)
-    .single()
+  const [{ data, error }, { data: comments }, { data: activity }] = await Promise.all([
+    supabase.from('team_tasks').select('*, lead:leads(id, name), menu:menus(id, title)').eq('id', id).single(),
+    supabase.from('task_comments').select('*').eq('task_id', id).order('created_at', { ascending: true }),
+    supabase.from('task_activity').select('*').eq('task_id', id).order('created_at', { ascending: false }),
+  ])
 
   if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(data)
+  return NextResponse.json({ ...data, comments: comments ?? [], activity: activity ?? [] })
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
