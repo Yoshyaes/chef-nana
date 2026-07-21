@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getCurrentUserId } from '@/lib/supabase/currentUser'
+import { logTaskChanges } from '@/lib/tasks/activity'
+import { sendTaskAssignedEmail } from '@/lib/email/taskNotifications'
 
 const PATCHABLE_FIELDS = ['title', 'notes', 'status', 'priority', 'owner_id', 'due_date', 'lead_id', 'menu_id']
 
@@ -25,6 +27,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   const body = await req.json()
 
+  const supabase = await createServiceClient()
+
+  const { data: before } = await supabase.from('team_tasks').select('*').eq('id', id).single()
+  if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
   for (const key of PATCHABLE_FIELDS) {
     if (key in body) updates[key] = body[key]
@@ -32,7 +39,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (updates.status === 'done') updates.completed_at = new Date().toISOString()
   if (updates.status && updates.status !== 'done') updates.completed_at = null
 
-  const supabase = await createServiceClient()
   const { data, error } = await supabase
     .from('team_tasks')
     .update(updates)
@@ -41,6 +47,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await logTaskChanges(supabase, id, userId, before, updates)
+
+  const reassigned = 'owner_id' in updates && updates.owner_id !== before.owner_id
+  if (reassigned && updates.owner_id !== userId) {
+    const { data: actor } = await supabase.from('profiles').select('full_name').eq('id', userId).single()
+    sendTaskAssignedEmail({
+      taskId: data.id,
+      title: data.title,
+      notes: data.notes,
+      dueDate: data.due_date,
+      priority: data.priority,
+      actorName: actor?.full_name ?? 'Someone',
+      recipientId: updates.owner_id as string,
+    }).catch(err => console.error('[task-email] reassignment failed', err))
+  }
+
   return NextResponse.json(data)
 }
 

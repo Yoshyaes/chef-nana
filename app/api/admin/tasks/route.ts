@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getCurrentUserId } from '@/lib/supabase/currentUser'
+import { logTaskActivity } from '@/lib/tasks/activity'
+import { sendTaskAssignedEmail } from '@/lib/email/taskNotifications'
 
 export async function GET(req: NextRequest) {
   const userId = await getCurrentUserId()
@@ -40,13 +42,15 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createServiceClient()
+  const ownerId = body.owner_id || userId
+
   const { data, error } = await supabase
     .from('team_tasks')
     .insert({
       title: body.title.trim(),
       notes: body.notes ?? null,
       priority: body.priority ?? 'medium',
-      owner_id: body.owner_id || userId,
+      owner_id: ownerId,
       created_by: userId,
       due_date: body.due_date || null,
       lead_id: body.lead_id ?? null,
@@ -56,5 +60,21 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await logTaskActivity(supabase, data.id, userId, 'created')
+
+  if (ownerId !== userId) {
+    const { data: actor } = await supabase.from('profiles').select('full_name').eq('id', userId).single()
+    sendTaskAssignedEmail({
+      taskId: data.id,
+      title: data.title,
+      notes: data.notes,
+      dueDate: data.due_date,
+      priority: data.priority,
+      actorName: actor?.full_name ?? 'Someone',
+      recipientId: ownerId,
+    }).catch(err => console.error('[task-email] assignment failed', err))
+  }
+
   return NextResponse.json(data, { status: 201 })
 }
