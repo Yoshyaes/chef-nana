@@ -105,28 +105,38 @@ export default function TaskDetailPage() {
 
   async function patch(updates: Record<string, unknown>) {
     setTask(prev => (prev ? { ...prev, ...updates } as Task : prev))
-    await fetch(`/api/admin/tasks/${id}`, {
+    const res = await fetch(`/api/admin/tasks/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     })
-    loadTask()
+    // Merge the PATCH response (authoritative task fields) into state rather
+    // than re-fetching the whole task. A separate loadTask() here would race
+    // against other in-flight patch() calls, since GET responses can resolve
+    // out of order and clobber whichever edit's fields settle last.
+    if (res.ok) {
+      const updated = await res.json()
+      setTask(prev => (prev ? { ...prev, ...updated } : prev))
+    }
   }
 
   async function handleAddComment(e: React.FormEvent) {
     e.preventDefault()
     if (!commentBody.trim()) return
     setPosting(true)
-    const res = await fetch(`/api/admin/tasks/${id}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body: commentBody.trim() }),
-    })
-    if (res.ok) {
-      setCommentBody('')
-      loadTask()
+    try {
+      const res = await fetch(`/api/admin/tasks/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: commentBody.trim() }),
+      })
+      if (res.ok) {
+        setCommentBody('')
+        loadTask()
+      }
+    } finally {
+      setPosting(false)
     }
-    setPosting(false)
   }
 
   async function handleDelete() {
