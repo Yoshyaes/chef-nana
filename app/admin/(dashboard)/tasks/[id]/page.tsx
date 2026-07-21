@@ -1,10 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface Profile { id: string; full_name: string; role: string; avatar_color: string }
+interface Comment { id: string; author_id: string; body: string; created_at: string }
+interface ActivityEvent { id: string; actor_id: string; action: string; detail: Record<string, unknown> | null; created_at: string }
 interface Task {
   id: string
   title: string
@@ -16,10 +18,58 @@ interface Task {
   due_date: string | null
   lead: { id: string; name: string } | null
   menu: { id: string; title: string } | null
+  comments: Comment[]
+  activity: ActivityEvent[]
 }
 
 const STATUSES = ['open', 'in_progress', 'done'] as const
 const PRIORITIES = ['low', 'medium', 'high'] as const
+
+function relativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const mins = Math.round(diffMs / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.round(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.round(hours / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' })
+}
+
+function formatDate(iso: string) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString([], { month: 'short', day: 'numeric' })
+}
+
+function activitySentence(event: ActivityEvent, profiles: Profile[]): string {
+  const actorName = profiles.find(p => p.id === event.actor_id)?.full_name ?? 'Someone'
+  const detail = event.detail ?? {}
+
+  switch (event.action) {
+    case 'created':
+      return `${actorName} created this task.`
+    case 'commented':
+      return `${actorName} commented.`
+    case 'reassigned': {
+      const toName = profiles.find(p => p.id === detail.to_owner)?.full_name ?? 'someone'
+      return `${actorName} reassigned this to ${toName}.`
+    }
+    case 'status_changed': {
+      const to = String(detail.to ?? '')
+      return `${actorName} changed the status to ${to === 'in_progress' ? 'in progress' : to}.`
+    }
+    case 'due_changed':
+      return detail.to
+        ? `${actorName} changed the due date to ${formatDate(String(detail.to))}.`
+        : `${actorName} cleared the due date.`
+    case 'edited': {
+      const fields = Array.isArray(detail.fields) ? detail.fields.join(', ') : 'this task'
+      return `${actorName} edited ${fields}.`
+    }
+    default:
+      return `${actorName} updated this task.`
+  }
+}
 
 export default function TaskDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -30,9 +80,12 @@ export default function TaskDetailPage() {
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [commentBody, setCommentBody] = useState('')
+  const [posting, setPosting] = useState(false)
+  const [showActivity, setShowActivity] = useState(false)
 
-  useEffect(() => {
-    fetch(`/api/admin/tasks/${id}`)
+  const loadTask = useCallback(() => {
+    return fetch(`/api/admin/tasks/${id}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         setTask(d)
@@ -40,9 +93,11 @@ export default function TaskDetailPage() {
           setTitle(d.title)
           setNotes(d.notes ?? '')
         }
+        return d
       })
-      .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => { loadTask().finally(() => setLoading(false)) }, [loadTask])
 
   useEffect(() => {
     fetch('/api/admin/profiles').then(r => r.ok ? r.json() : []).then(setProfiles)
@@ -50,12 +105,28 @@ export default function TaskDetailPage() {
 
   async function patch(updates: Record<string, unknown>) {
     setTask(prev => (prev ? { ...prev, ...updates } as Task : prev))
-    const res = await fetch(`/api/admin/tasks/${id}`, {
+    await fetch(`/api/admin/tasks/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     })
-    if (res.ok) setTask(await res.json())
+    loadTask()
+  }
+
+  async function handleAddComment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!commentBody.trim()) return
+    setPosting(true)
+    const res = await fetch(`/api/admin/tasks/${id}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: commentBody.trim() }),
+    })
+    if (res.ok) {
+      setCommentBody('')
+      loadTask()
+    }
+    setPosting(false)
   }
 
   async function handleDelete() {
@@ -65,6 +136,8 @@ export default function TaskDetailPage() {
     await fetch(`/api/admin/tasks/${id}`, { method: 'DELETE' })
     router.push('/admin/tasks')
   }
+
+  const profileById = (pid: string) => profiles.find(p => p.id === pid)
 
   if (loading) return <div style={{ color: '#9a7d5a', padding: 40 }}>Loading…</div>
   if (!task) return <div style={{ color: '#B85A35', padding: 40 }}>Task not found.</div>
@@ -108,6 +181,70 @@ export default function TaskDetailPage() {
               rows={5}
               style={{ width: '100%', padding: 12, border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 14, color: 'var(--brown)', resize: 'vertical', fontFamily: 'inherit' }}
             />
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Comments</div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16 }}>
+              {task.comments.map(comment => {
+                const author = profileById(comment.author_id)
+                return (
+                  <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <span style={{
+                      width: 8, height: 8, borderRadius: '50%', marginTop: 6, flexShrink: 0,
+                      background: author?.avatar_color ?? '#C9973A',
+                    }} />
+                    <div>
+                      <div style={{ fontSize: 12, color: 'var(--brown)', fontWeight: 500 }}>
+                        {author?.full_name ?? 'Someone'} <span style={{ color: '#9a7d5a', fontWeight: 400 }}>· {relativeTime(comment.created_at)}</span>
+                      </div>
+                      <div style={{ fontSize: 14, color: 'var(--brown)', marginTop: 2 }}>{comment.body}</div>
+                    </div>
+                  </div>
+                )
+              })}
+              {task.comments.length === 0 && (
+                <div style={{ fontSize: 13, color: '#9a7d5a' }}>No comments yet.</div>
+              )}
+            </div>
+
+            <form onSubmit={handleAddComment} style={{ display: 'flex', gap: 8 }}>
+              <input
+                value={commentBody}
+                onChange={e => setCommentBody(e.target.value)}
+                placeholder="Add a comment…"
+                style={{ flex: 1, padding: '9px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 14 }}
+              />
+              <button
+                type="submit"
+                disabled={posting}
+                style={{ padding: '9px 16px', background: 'var(--brown)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
+              >
+                {posting ? 'Posting…' : 'Post'}
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <button
+              onClick={() => setShowActivity(v => !v)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}
+            >
+              Activity {showActivity ? '▾' : '▸'}
+            </button>
+            {showActivity && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {task.activity.map(event => (
+                  <div key={event.id} style={{ fontSize: 13, color: '#7a6652' }}>
+                    {activitySentence(event, profiles)} <span style={{ color: '#9a7d5a' }}>· {relativeTime(event.created_at)}</span>
+                  </div>
+                ))}
+                {task.activity.length === 0 && (
+                  <div style={{ fontSize: 13, color: '#9a7d5a' }}>No activity yet.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
