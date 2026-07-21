@@ -1,6 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
+
+interface DueTodayTask {
+  id: string
+  title: string
+  priority: 'low' | 'medium' | 'high'
+}
+
+const priorityDot: Record<string, string> = {
+  low: '#9a7d5a',
+  medium: '#C9973A',
+  high: '#B85A35',
+}
 
 interface TriageAction {
   priority: 'hot' | 'warm' | 'cool'
@@ -35,12 +48,23 @@ export default function TodayPage() {
   const [triage, setTriage] = useState<Triage | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [dueToday, setDueToday] = useState<DueTodayTask[]>([])
 
   useEffect(() => {
     fetch('/api/admin/triage')
       .then(r => r.ok ? r.json() : null)
       .then(setTriage)
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/admin/tasks?view=mine')
+      .then(r => r.ok ? r.json() : [])
+      .then((tasks: { id: string; title: string; priority: string; due_date: string | null }[]) => {
+        const today = new Date().toISOString().slice(0, 10)
+        setDueToday(tasks.filter(t => t.due_date === today) as DueTodayTask[])
+      })
+      .catch(() => {})
   }, [])
 
   async function generateTriage() {
@@ -78,6 +102,28 @@ export default function TodayPage() {
           {generating ? 'Generating…' : 'Refresh brief'}
         </button>
       </div>
+
+      {dueToday.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
+            Tasks due today
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {dueToday.map(task => (
+              <Link key={task.id} href={`/admin/tasks/${task.id}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: '#fff', border: '1px solid #eee5d7', borderRadius: 10,
+                  padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: priorityDot[task.priority] ?? '#ccc', flexShrink: 0 }} />
+                  <div style={{ flex: 1, fontSize: 14, color: 'var(--brown)', fontWeight: 500 }}>{task.title}</div>
+                  <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 500 }}>View →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!triage ? (
         <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 32, textAlign: 'center' }}>
