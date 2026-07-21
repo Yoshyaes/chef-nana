@@ -8,6 +8,9 @@ interface Lead { id: string; name: string; organization: string; type: string; m
 interface Enrichment { research_brief: string | null; research_sources: string[] | null; provider: string }
 interface Message { id: string; direction: string; channel: string; subject: string | null; body: string; sent_at: string }
 interface Draft { id: string; subject: string | null; status: string; created_at: string }
+interface OpenTask { id: string; title: string; status: string; priority: string; due_date: string | null; owner_id: string }
+
+const PRIORITY_COLORS: Record<string, string> = { low: '#9a7d5a', medium: '#C9973A', high: '#B85A35' }
 
 const STAGES = ['sourced', 'contacted', 'responded', 'negotiating', 'won', 'lost', 'nurture']
 
@@ -18,6 +21,7 @@ export default function LeadDetailPage() {
   const [enrichment, setEnrichment] = useState<Enrichment[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [drafts, setDrafts] = useState<Draft[]>([])
+  const [tasks, setTasks] = useState<OpenTask[]>([])
   const [loading, setLoading] = useState(true)
   const [researching, setResearching] = useState(false)
   const [drafting, setDrafting] = useState(false)
@@ -31,6 +35,7 @@ export default function LeadDetailPage() {
         setEnrichment(d.enrichment ?? [])
         setMessages(d.messages ?? [])
         setDrafts(d.drafts ?? [])
+        setTasks(d.tasks ?? [])
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -111,6 +116,27 @@ export default function LeadDetailPage() {
           ) : (
             <div style={{ background: '#fff', border: '1px dashed #e5d9c9', borderRadius: 12, padding: 24, marginBottom: 24, textAlign: 'center' }}>
               <div style={{ color: '#9a7d5a', fontSize: 14 }}>No research yet — click &ldquo;Research&rdquo; to generate a brief with Claude.</div>
+            </div>
+          )}
+
+          {tasks.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 20, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Open tasks</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {tasks.map(task => (
+                  <Link key={task.id} href={`/admin/tasks/${task.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: '#faf7f3' }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: PRIORITY_COLORS[task.priority] ?? '#9a7d5a', flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 13, color: 'var(--brown)' }}>{task.title}</span>
+                      {task.due_date && (
+                        <span style={{ fontSize: 11, color: '#9a7d5a', flexShrink: 0 }}>
+                          {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
 

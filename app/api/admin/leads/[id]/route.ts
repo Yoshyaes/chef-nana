@@ -5,17 +5,18 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   const { id } = await params
   const supabase = await createServiceClient()
 
-  const [{ data: lead }, { data: enrichment }, { data: messages }, { data: drafts }, { data: log }] =
+  const [{ data: lead }, { data: enrichment }, { data: messages }, { data: drafts }, { data: log }, { data: tasks }] =
     await Promise.all([
       supabase.from('leads').select('*').eq('id', id).single(),
       supabase.from('enrichment').select('*').eq('lead_id', id),
       supabase.from('messages').select('*').eq('lead_id', id).order('sent_at', { ascending: false }),
       supabase.from('drafts').select('*').eq('lead_id', id).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('team_tasks').select('id, title, status, priority, due_date, owner_id').eq('lead_id', id).neq('status', 'done').order('due_date', { ascending: true, nullsFirst: false }),
     ])
 
   if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ lead, enrichment, messages, drafts, log })
+  return NextResponse.json({ lead, enrichment, messages, drafts, log, tasks })
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
