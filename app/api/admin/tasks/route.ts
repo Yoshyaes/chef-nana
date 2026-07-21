@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getCurrentUserId } from '@/lib/supabase/currentUser'
 import { logTaskActivity } from '@/lib/tasks/activity'
@@ -65,15 +65,20 @@ export async function POST(req: NextRequest) {
 
   if (ownerId !== userId) {
     const { data: actor } = await supabase.from('profiles').select('full_name').eq('id', userId).single()
-    sendTaskAssignedEmail({
-      taskId: data.id,
-      title: data.title,
-      notes: data.notes,
-      dueDate: data.due_date,
-      priority: data.priority,
-      actorName: actor?.full_name ?? 'Someone',
-      recipientId: ownerId,
-    }).catch(err => console.error('[task-email] assignment failed', err))
+    // after() keeps the serverless invocation alive for this send, which a
+    // bare unawaited call would not guarantee once the response below
+    // returns and Vercel is free to freeze the function.
+    after(() =>
+      sendTaskAssignedEmail({
+        taskId: data.id,
+        title: data.title,
+        notes: data.notes,
+        dueDate: data.due_date,
+        priority: data.priority,
+        actorName: actor?.full_name ?? 'Someone',
+        recipientId: ownerId,
+      }).catch(err => console.error('[task-email] assignment failed', err))
+    )
   }
 
   return NextResponse.json(data, { status: 201 })

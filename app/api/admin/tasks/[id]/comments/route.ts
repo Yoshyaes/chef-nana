@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getCurrentUserId } from '@/lib/supabase/currentUser'
 import { logTaskActivity } from '@/lib/tasks/activity'
@@ -31,16 +31,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (task.owner_id !== userId) {
     const { data: actor } = await supabase.from('profiles').select('full_name').eq('id', userId).single()
-    sendTaskCommentEmail({
-      taskId: id,
-      title: task.title,
-      notes: null,
-      dueDate: null,
-      priority: '',
-      actorName: actor?.full_name ?? 'Someone',
-      recipientId: task.owner_id,
-      commentBody: comment.body,
-    }).catch(err => console.error('[task-email] comment failed', err))
+    after(() =>
+      sendTaskCommentEmail({
+        taskId: id,
+        title: task.title,
+        notes: null,
+        dueDate: null,
+        priority: '',
+        actorName: actor?.full_name ?? 'Someone',
+        recipientId: task.owner_id,
+        commentBody: comment.body,
+      }).catch(err => console.error('[task-email] comment failed', err))
+    )
   }
 
   return NextResponse.json(comment, { status: 201 })

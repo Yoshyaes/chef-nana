@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getCurrentUserId } from '@/lib/supabase/currentUser'
 import { logTaskChanges } from '@/lib/tasks/activity'
@@ -53,15 +53,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const reassigned = 'owner_id' in updates && updates.owner_id !== before.owner_id
   if (reassigned && updates.owner_id !== userId) {
     const { data: actor } = await supabase.from('profiles').select('full_name').eq('id', userId).single()
-    sendTaskAssignedEmail({
-      taskId: data.id,
-      title: data.title,
-      notes: data.notes,
-      dueDate: data.due_date,
-      priority: data.priority,
-      actorName: actor?.full_name ?? 'Someone',
-      recipientId: updates.owner_id as string,
-    }).catch(err => console.error('[task-email] reassignment failed', err))
+    after(() =>
+      sendTaskAssignedEmail({
+        taskId: data.id,
+        title: data.title,
+        notes: data.notes,
+        dueDate: data.due_date,
+        priority: data.priority,
+        actorName: actor?.full_name ?? 'Someone',
+        recipientId: updates.owner_id as string,
+      }).catch(err => console.error('[task-email] reassignment failed', err))
+    )
   }
 
   return NextResponse.json(data)
