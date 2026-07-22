@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { getAnthropicClient, updateMonthlySpend } from '@/lib/anthropic'
 import { REPLY_PROMPT } from '@/lib/admin-prompts'
 import { sendDraftNotification } from '@/lib/discord'
+import { sendPushIfEnabled } from '@/lib/push'
 
 const MODEL = 'claude-sonnet-4-6'
 
@@ -107,6 +108,14 @@ export const handleInboundEmail = inngest.createFunction(
       { name: lead.name, organization: lead.organization },
       { subject, body: body.slice(0, 300) }
     )
+
+    // Step 6b: Web push — same trigger as the Discord ping above.
+    const isHot = fitScore >= 70
+    await sendPushIfEnabled(isHot ? 'push_hot_replies' : 'push_new_drafts', {
+      title: isHot ? `Hot reply from ${lead.name}` : `New draft ready: ${lead.name}`,
+      body: draft.subject ?? subject,
+      url: `/admin/drafts/${draft.id}`,
+    })
 
     // Step 7: Activity log
     await supabase.from('activity_log').insert({

@@ -9,6 +9,9 @@ const NOT_CONFIGURED = {
   sending_domain: 'mail.chefnanawilmot.com',
   anthropicKeySet: false,
   apolloKeySet: false,
+  push_new_drafts: true,
+  push_hot_replies: true,
+  push_brief_ready: true,
   notConfigured: true,
 }
 
@@ -22,7 +25,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('settings')
-    .select('monthly_budget_cap, current_month_spend, brand_voice_notes, voice_examples, approve_before_sending, sending_domain')
+    .select('monthly_budget_cap, current_month_spend, brand_voice_notes, voice_examples, approve_before_sending, sending_domain, push_new_drafts, push_hot_replies, push_brief_ready')
     .single()
 
   if (error) return NextResponse.json(NOT_CONFIGURED)
@@ -39,6 +42,7 @@ export async function GET() {
     gmailConnected: !!full?.gmail_refresh_token,
     gmailConnectedAt: full?.gmail_connected_at ?? null,
     discordConfigured: !!(process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_CHANNEL_ID),
+    pushConfigured: !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
   })
 }
 
@@ -57,6 +61,9 @@ export async function PUT(req: NextRequest) {
   if (body.sending_domain !== undefined) updates.sending_domain = body.sending_domain
   if (body.anthropic_api_key !== undefined) updates.anthropic_api_key_encrypted = body.anthropic_api_key
   if (body.apollo_api_key !== undefined) updates.apollo_api_key_encrypted = body.apollo_api_key
+  if (body.push_new_drafts !== undefined) updates.push_new_drafts = body.push_new_drafts
+  if (body.push_hot_replies !== undefined) updates.push_hot_replies = body.push_hot_replies
+  if (body.push_brief_ready !== undefined) updates.push_brief_ready = body.push_brief_ready
 
   const { data, error } = await supabase.from('settings').update(updates).neq('id', '00000000-0000-0000-0000-000000000000').select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

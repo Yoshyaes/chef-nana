@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Card from '@/components/admin/ui/Card'
 import Button from '@/components/admin/ui/Button'
+import { usePushSubscription } from '@/hooks/admin/usePushSubscription'
 
 interface Settings {
   monthly_budget_cap: number
@@ -16,6 +17,10 @@ interface Settings {
   gmailConnected: boolean
   gmailConnectedAt: string | null
   discordConfigured: boolean
+  pushConfigured: boolean
+  push_new_drafts: boolean
+  push_hot_replies: boolean
+  push_brief_ready: boolean
   notConfigured?: boolean
 }
 
@@ -27,6 +32,7 @@ const labelStyle: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted
 const sectionStyle: React.CSSProperties = { padding: 24, marginBottom: 20 }
 
 export default function SettingsPage() {
+  const push = usePushSubscription()
   const [settings, setSettings] = useState<Settings | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -265,6 +271,56 @@ export default function SettingsPage() {
             Set Interactions Endpoint URL in Discord Developer Portal to{' '}
             <code>https://www.chefnanawilmot.com/api/discord/interactions</code>
           </div>
+        )}
+      </Card>
+
+      <Card style={{ ...sectionStyle, marginTop: 0 }}>
+        <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 12 }}>Push notifications</div>
+        {!settings.pushConfigured ? (
+          <div style={{ fontSize: 13, color: 'var(--text-muted-2)', lineHeight: 1.7 }}>
+            Not configured. Add <code>NEXT_PUBLIC_VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code>, and <code>VAPID_SUBJECT</code> to Vercel to enable push.
+          </div>
+        ) : !push.supported ? (
+          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>This browser doesn&apos;t support push notifications.</div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 13, color: 'var(--brown)', fontWeight: 500 }}>
+                  {push.subscribed ? '✓ Enabled on this device' : 'Not enabled on this device'}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.4 }}>
+                  On iPhone, add this app to your home screen first (Share → Add to Home Screen) — Safari can&apos;t send push notifications to an ordinary browser tab.
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant={push.subscribed ? 'ghost' : 'brass'}
+                disabled={push.busy}
+                onClick={() => (push.subscribed ? push.unsubscribe() : push.subscribe())}
+              >
+                {push.busy ? '…' : push.subscribed ? 'Disable' : 'Enable'}
+              </Button>
+            </div>
+
+            {[
+              { key: 'push_new_drafts' as const, label: 'New drafts ready' },
+              { key: 'push_hot_replies' as const, label: 'Hot replies' },
+              { key: 'push_brief_ready' as const, label: 'Morning brief ready' },
+            ].map(t => (
+              <label key={t.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 13, color: 'var(--brown)' }}>
+                <input
+                  type="checkbox"
+                  checked={settings[t.key]}
+                  onChange={e => setSettings(p => p ? { ...p, [t.key]: e.target.checked } : p)}
+                />
+                {t.label}
+              </label>
+            ))}
+            <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 4 }}>
+              These toggles are saved with the form above (Save settings) and apply to every registered device on the team.
+            </div>
+          </>
         )}
       </Card>
 

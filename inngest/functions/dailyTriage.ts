@@ -2,6 +2,7 @@ import { inngest } from '../client'
 import { getAnthropicClient, updateMonthlySpend } from '@/lib/anthropic'
 import { TRIAGE_PROMPT } from '@/lib/admin-prompts'
 import { createServiceClient } from '@/lib/supabase/server'
+import { sendPushIfEnabled } from '@/lib/push'
 
 const MODEL = 'claude-haiku-4-5-20251001'
 
@@ -93,6 +94,12 @@ export const dailyTriage = inngest.createFunction(
       latest_triage: { tldr: parsed.tldr, actions: parsed.actions ?? [], stats, generated_at: new Date().toISOString() } as any,
       updated_at: new Date().toISOString(),
     }).neq('id', '00000000-0000-0000-0000-000000000000')
+
+    await sendPushIfEnabled('push_brief_ready', {
+      title: 'Your brief is ready',
+      body: `${stats.draftsToApprove} draft${stats.draftsToApprove !== 1 ? 's' : ''} to approve`,
+      url: '/admin/today',
+    })
 
     return { stats, triageGenerated: true }
   }
