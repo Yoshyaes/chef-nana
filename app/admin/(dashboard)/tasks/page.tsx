@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { useCurrentProfile } from '@/hooks/useCurrentProfile'
 import { localDateString } from '@/lib/dates'
 import { useTasksList, useProfiles, useAddTask, useToggleTaskDone, type Task, type TaskFilters } from '@/hooks/admin/useTasks'
@@ -23,6 +24,7 @@ const today = () => localDateString()
 
 export default function TasksPage() {
   const { profile: me } = useCurrentProfile()
+  const isMobile = useIsMobile()
   const [tab, setTab] = useState<TaskFilters['view']>('mine')
   const [ownerFilter, setOwnerFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -150,52 +152,77 @@ export default function TasksPage() {
             const overdue = isOverdue(task)
             return (
               <SwipeRow key={task.id} onSwipeRight={() => handleToggle(task)} rightLabel={task.status === 'done' ? '↺ Reopen' : '✓ Complete'}>
-                <Card style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
-                  <button
-                    onClick={() => handleToggle(task)}
-                    aria-label="Toggle done"
-                    style={{
-                      width: 20, height: 20, borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
-                      border: `2px solid ${task.status === 'done' ? 'var(--success)' : 'var(--border-hairline)'}`,
-                      background: task.status === 'done' ? 'var(--success)' : 'transparent',
-                      color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                  >
-                    {task.status === 'done' ? '✓' : ''}
-                  </button>
+                <Card style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 6 : 12, padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <button
+                      onClick={() => handleToggle(task)}
+                      aria-label="Toggle done"
+                      style={{
+                        width: 20, height: 20, borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
+                        border: `2px solid ${task.status === 'done' ? 'var(--success)' : 'var(--border-hairline)'}`,
+                        background: task.status === 'done' ? 'var(--success)' : 'transparent',
+                        color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      {task.status === 'done' ? '✓' : ''}
+                    </button>
 
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLORS[task.priority], flexShrink: 0 }} />
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLORS[task.priority], flexShrink: 0 }} />
 
-                  <Link href={`/admin/tasks/${task.id}`} style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
-                    <div style={{
-                      fontSize: 14, color: 'var(--brown)', fontWeight: 500,
-                      textDecoration: task.status === 'done' ? 'line-through' : 'none',
-                      opacity: task.status === 'done' ? 0.5 : 1,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {task.title}
+                    <Link href={`/admin/tasks/${task.id}`} style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
+                      <div style={{
+                        fontSize: 14, color: 'var(--brown)', fontWeight: 500,
+                        textDecoration: task.status === 'done' ? 'line-through' : 'none',
+                        opacity: task.status === 'done' ? 0.5 : 1,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {task.title}
+                      </div>
+                    </Link>
+
+                    {!isMobile && (task.lead || task.menu) && (
+                      <span style={{ fontSize: 11, background: 'var(--chip-bg)', color: 'var(--text-muted-2)', padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>
+                        {task.lead ? task.lead.name : task.menu?.title}
+                      </span>
+                    )}
+
+                    {!isMobile && owner && (
+                      <span title={owner.full_name} style={{
+                        width: 24, height: 24, borderRadius: '50%', background: owner.avatar_color, color: '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, flexShrink: 0,
+                      }}>
+                        {owner.full_name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+
+                    {!isMobile && task.due_date && (
+                      <span style={{ fontSize: 12, color: overdue ? 'var(--danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400, flexShrink: 0, width: 70, textAlign: 'right' }}>
+                        {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
+
+                  {isMobile && (task.lead || task.menu || owner || task.due_date) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 32 }}>
+                      {(task.lead || task.menu) && (
+                        <span style={{ fontSize: 11, background: 'var(--chip-bg)', color: 'var(--text-muted-2)', padding: '2px 8px', borderRadius: 6 }}>
+                          {task.lead ? task.lead.name : task.menu?.title}
+                        </span>
+                      )}
+                      {task.due_date && (
+                        <span style={{ fontSize: 11.5, color: overdue ? 'var(--danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400 }}>
+                          {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                      {owner && (
+                        <span title={owner.full_name} style={{
+                          width: 18, height: 18, borderRadius: '50%', background: owner.avatar_color, color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9.5, fontWeight: 600, marginLeft: 'auto',
+                        }}>
+                          {owner.full_name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
                     </div>
-                  </Link>
-
-                  {(task.lead || task.menu) && (
-                    <span style={{ fontSize: 11, background: 'var(--chip-bg)', color: 'var(--text-muted-2)', padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>
-                      {task.lead ? task.lead.name : task.menu?.title}
-                    </span>
-                  )}
-
-                  {owner && (
-                    <span title={owner.full_name} style={{
-                      width: 24, height: 24, borderRadius: '50%', background: owner.avatar_color, color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, flexShrink: 0,
-                    }}>
-                      {owner.full_name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-
-                  {task.due_date && (
-                    <span style={{ fontSize: 12, color: overdue ? 'var(--danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400, flexShrink: 0, width: 70, textAlign: 'right' }}>
-                      {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                    </span>
                   )}
                 </Card>
               </SwipeRow>

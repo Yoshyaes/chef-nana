@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface Lead { id: string; name: string; organization: string; type: string; market: string; email: string | null; linkedin_url: string | null; fit_score: number | null; est_annual_value: number | null; stage: string; is_recurring: boolean }
 interface Enrichment { research_brief: string | null; research_sources: string[] | null; provider: string }
@@ -15,6 +16,7 @@ const PRIORITY_COLORS: Record<string, string> = { low: '#9a7d5a', medium: '#C997
 const STAGES = ['sourced', 'contacted', 'responded', 'negotiating', 'won', 'lost', 'nurture']
 
 export default function LeadDetailPage() {
+  const isMobile = useIsMobile()
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [lead, setLead] = useState<Lead | null>(null)
@@ -78,8 +80,8 @@ export default function LeadDetailPage() {
         <Link href="/admin/leads" style={{ fontSize: 13, color: '#9a7d5a', textDecoration: 'none' }}>← All leads</Link>
       </div>
 
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-        <div style={{ flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 24, alignItems: 'flex-start' }}>
+        <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : undefined }}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--brown)', fontWeight: 400 }}>{lead.name}</h1>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
@@ -163,7 +165,7 @@ export default function LeadDetailPage() {
           </div>
         </div>
 
-        <div style={{ width: 220, flexShrink: 0 }}>
+        <div style={{ width: isMobile ? '100%' : 220, flexShrink: 0 }}>
           <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 20 }}>
             <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>Stage</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
