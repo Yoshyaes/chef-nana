@@ -41,24 +41,24 @@ export default function AdminSidebar({ className }: { className?: string }) {
   return (
     <aside className={className} style={{
       width: 244,
-      background: '#fff',
-      borderRight: '1px solid #eee5d7',
+      background: 'var(--surface)',
+      borderRight: '1px solid var(--border-hairline)',
       flexDirection: 'column',
       padding: '0',
     }}>
       {/* Brand */}
-      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #eee5d7' }}>
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid var(--border-hairline)' }}>
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--brown)', lineHeight: 1.3 }}>
           Georgina&apos;s Assistant
         </div>
-        <div style={{ fontSize: 11, color: '#9a7d5a', marginTop: 2, letterSpacing: '0.06em' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, letterSpacing: '0.06em' }}>
           LEAD STUDIO
         </div>
       </div>
 
       {/* Workspace nav */}
       <nav style={{ padding: '16px 12px 8px', flex: 1 }}>
-        <div style={{ fontSize: 10, color: '#9a7d5a', letterSpacing: '0.1em', padding: '0 8px 8px', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.1em', padding: '0 8px 8px', textTransform: 'uppercase' }}>
           Workspace
         </div>
         {navItems.map(item => {
@@ -75,7 +75,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
                 marginBottom: 2,
                 background: active ? 'rgba(201,151,58,0.1)' : 'transparent',
                 borderLeft: active ? '2px solid var(--gold)' : '2px solid transparent',
-                color: active ? 'var(--brown)' : '#5c3a22',
+                color: active ? 'var(--brown)' : 'var(--text-muted-2)',
                 fontSize: 14,
                 cursor: 'pointer',
                 transition: 'background 0.15s',
@@ -101,7 +101,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
           )
         })}
 
-        <div style={{ fontSize: 10, color: '#9a7d5a', letterSpacing: '0.1em', padding: '16px 8px 8px', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.1em', padding: '16px 8px 8px', textTransform: 'uppercase' }}>
           Tools
         </div>
         {toolItems.map(item => {
@@ -117,7 +117,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
                 marginBottom: 2,
                 background: active ? 'rgba(201,151,58,0.1)' : 'transparent',
                 borderLeft: active ? '2px solid var(--gold)' : '2px solid transparent',
-                color: '#5c3a22',
+                color: 'var(--text-muted-2)',
                 fontSize: 14,
                 cursor: 'pointer',
               }}>
@@ -130,15 +130,15 @@ export default function AdminSidebar({ className }: { className?: string }) {
       </nav>
 
       {/* Usage meter */}
-      <div style={{ padding: '16px 20px', borderTop: '1px solid #eee5d7' }}>
-        <div style={{ fontSize: 11, color: '#9a7d5a', marginBottom: 6 }}>
+      <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border-hairline)' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
           API this month
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--brown)', marginBottom: 6 }}>
           <span>${spend.current.toFixed(2)}</span>
           <span style={{ opacity: 0.5 }}>${spend.cap} cap</span>
         </div>
-        <div style={{ height: 4, background: '#f0e8db', borderRadius: 2, overflow: 'hidden' }}>
+        <div style={{ height: 4, background: 'var(--chip-bg)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${spendPct}%`,
@@ -160,7 +160,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
             <div style={{ fontSize: 13, color: 'var(--brown)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile?.full_name ?? '...'}
             </div>
-            <div style={{ fontSize: 11, color: '#9a7d5a', textTransform: 'capitalize' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize' }}>
               {profile?.role ?? ''}
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
             style={{
               background: 'none',
               border: 'none',
-              color: '#9a7d5a',
+              color: 'var(--text-muted)',
               fontSize: 11,
               cursor: 'pointer',
               padding: '4px 2px',

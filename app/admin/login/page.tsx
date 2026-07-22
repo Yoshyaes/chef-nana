@@ -31,13 +31,13 @@ function LoginContent() {
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--brown)', marginBottom: 8 }}>
           Georgina&apos;s Assistant
         </div>
-        <div style={{ fontSize: 13, color: '#7a6652', marginBottom: 40 }}>Lead Studio</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted-2)', marginBottom: 40 }}>Lead Studio</div>
 
-        <div style={{ background: '#fff', border: '1px solid #e5d9c9', borderRadius: 12, padding: 32 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 12, padding: 32 }}>
           {error && (
             <div style={{
               background: '#fef2f0', border: '1px solid #f5c6bb', borderRadius: 8,
-              padding: '10px 14px', marginBottom: 20, fontSize: 13, color: '#B85A35',
+              padding: '10px 14px', marginBottom: 20, fontSize: 13, color: 'var(--danger)',
             }}>
               {error === 'unauthorized'
                 ? 'Your Google account is not authorized to access this admin.'
@@ -45,7 +45,7 @@ function LoginContent() {
             </div>
           )}
 
-          <p style={{ color: '#7a6652', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+          <p style={{ color: 'var(--text-muted-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
             Sign in with your Google account to access the admin.
           </p>
 

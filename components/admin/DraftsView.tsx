@@ -8,6 +8,7 @@ import {
   useDraft,
   useApproveDraft,
   useRejectDraft,
+  useBulkDraftAction,
   useSaveDraftEdit,
   useRedraftDraft,
 } from '@/hooks/admin/useDrafts'
@@ -67,8 +68,8 @@ function ThreadPanel({ leadId }: { leadId: string }) {
           return (
             <div key={m.id} style={{
               borderRadius: 10,
-              border: `1px solid ${isInbound ? 'var(--border-hairline)' : '#d8e8dc'}`,
-              background: isInbound ? 'var(--surface-alt)' : '#f4f9f5',
+              border: '1px solid var(--border-hairline)',
+              background: 'var(--surface-alt)',
               padding: '12px 14px',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
@@ -116,11 +117,15 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
   const [editSubject, setEditSubject] = useState('')
   const [whyExpanded, setWhyExpanded] = useState(true)
   const [showThread, setShowThread] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set())
 
   const draftsQuery = useDraftsList()
   const draftQuery = useDraft(selectedId)
   const approve = useApproveDraft()
   const reject = useRejectDraft()
+  const bulkApprove = useBulkDraftAction('approve')
+  const bulkReject = useBulkDraftAction('reject')
   const saveEdit = useSaveDraftEdit(selectedId)
   const redraft = useRedraftDraft(selectedId)
 
@@ -144,11 +149,33 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
   }, [isMobile, drafts.length])
 
   function selectDraft(id: string) {
+    if (bulkMode) {
+      setBulkSelected(prev => {
+        const next = new Set(prev)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        return next
+      })
+      return
+    }
     setSelectedId(id)
     setEditing(false)
     setShowThread(false)
     setWhyExpanded(true)
     if (isMobile) setMobileView('detail')
+  }
+
+  function toggleBulkMode() {
+    setBulkMode(m => !m)
+    setBulkSelected(new Set())
+  }
+
+  function handleBulkApprove() {
+    bulkApprove.mutate(Array.from(bulkSelected), { onSuccess: () => { setBulkSelected(new Set()); setBulkMode(false) } })
+  }
+
+  function handleBulkReject() {
+    bulkReject.mutate(Array.from(bulkSelected), { onSuccess: () => { setBulkSelected(new Set()); setBulkMode(false) } })
   }
 
   function handleApprove(id: string) {
@@ -195,6 +222,11 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
         <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--brown)', fontWeight: 500 }}>
           Drafts <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>{drafts.length}</span>
         </h2>
+        {drafts.length > 0 && (
+          <Button size="sm" variant="ghost" onClick={toggleBulkMode}>
+            {bulkMode ? 'Cancel' : 'Select'}
+          </Button>
+        )}
       </div>
       <div style={{ padding: '0 16px 12px' }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search sender or subject…" />
@@ -220,13 +252,40 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
         )}
 
         {filtered.map(d => (
-          <div key={d.id} onClick={() => selectDraft(d.id)} style={{ cursor: 'pointer' }}>
-            <SwipeRow onSwipeRight={() => handleApprove(d.id)} onSwipeLeft={() => handleReject(d.id)}>
-              <DraftRow draft={d} selected={!isMobile && selectedId === d.id} />
-            </SwipeRow>
+          <div key={d.id} onClick={() => selectDraft(d.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+            {bulkMode && (
+              <input
+                type="checkbox"
+                checked={bulkSelected.has(d.id)}
+                onChange={() => selectDraft(d.id)}
+                onClick={e => e.stopPropagation()}
+                style={{ flexShrink: 0, width: 18, height: 18 }}
+              />
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SwipeRow disabled={bulkMode} onSwipeRight={() => handleApprove(d.id)} onSwipeLeft={() => handleReject(d.id)}>
+                <DraftRow draft={d} selected={!isMobile && selectedId === d.id} />
+              </SwipeRow>
+            </div>
           </div>
         ))}
       </div>
+
+      {bulkMode && bulkSelected.size > 0 && (
+        <div style={{
+          position: 'sticky', bottom: 0, padding: '10px 16px calc(10px + env(safe-area-inset-bottom))',
+          background: 'linear-gradient(transparent, var(--surface-alt) 30%)',
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted-2)', marginRight: 'auto' }}>{bulkSelected.size} selected</span>
+          <Button size="sm" variant="green" onClick={handleBulkApprove} disabled={bulkApprove.isPending || bulkReject.isPending}>
+            {bulkApprove.isPending ? 'Approving…' : 'Approve'}
+          </Button>
+          <Button size="sm" variant="danger" onClick={handleBulkReject} disabled={bulkApprove.isPending || bulkReject.isPending}>
+            {bulkReject.isPending ? 'Rejecting…' : 'Reject'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 
@@ -278,7 +337,7 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
                 onClick={() => setShowThread(t => !t)}
                 style={{
                   fontSize: 12, color: showThread ? 'var(--success)' : 'var(--text-muted)',
-                  background: showThread ? '#e8f2ec' : 'var(--chip-bg)',
+                  background: 'var(--chip-bg)',
                   border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 500,
                 }}
               >
@@ -290,7 +349,7 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
           {showThread && detail.lead_id && <ThreadPanel key={detail.lead_id} leadId={detail.lead_id} />}
 
           {detail.reasoning && (
-            <Card style={{ background: '#FFFBF4', border: '1px solid #F0E3CC', padding: 14, marginBottom: 18 }}>
+            <Card style={{ background: 'var(--surface-alt)', border: '1px solid var(--border-hairline)', padding: 14, marginBottom: 18 }}>
               <button
                 onClick={() => setWhyExpanded(w => !w)}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}

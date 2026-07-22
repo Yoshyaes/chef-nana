@@ -81,6 +81,38 @@ export function useRejectDraft() {
   return useRemoveDraftMutation('reject', 'Draft rejected')
 }
 
+// Bulk approve/reject for multi-select mode. Kept separate from
+// useApproveDraft/useRejectDraft (rather than looping their .mutate())
+// so this has its own isPending/isError state instead of racing whichever
+// single-draft mutation call happened most recently.
+export function useBulkDraftAction(action: 'approve' | 'reject') {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const results = await Promise.allSettled(
+        ids.map(id => fetchJson(`/api/admin/drafts/${id}/${action}`, { method: 'POST' }))
+      )
+      const failed = results.filter(r => r.status === 'rejected').length
+      if (failed > 0) throw new Error(`${failed} of ${ids.length} drafts failed — the rest went through`)
+      return ids
+    },
+    onMutate: async (ids: string[]) => {
+      await qc.cancelQueries({ queryKey: ['drafts'] })
+      const previous = qc.getQueryData<DraftListItem[]>(['drafts'])
+      qc.setQueryData<DraftListItem[]>(['drafts'], prev => prev?.filter(d => !ids.includes(d.id)))
+      return { previous }
+    },
+    onError: (err, _ids, context) => {
+      if (context?.previous) qc.setQueryData(['drafts'], context.previous)
+      toast.error(err instanceof Error ? err.message : 'Bulk action failed')
+    },
+    onSuccess: ids => {
+      toast.success(`${ids.length} draft${ids.length !== 1 ? 's' : ''} ${action === 'approve' ? 'approved & sent' : 'rejected'}`)
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['drafts'] }),
+  })
+}
+
 export function useSaveDraftEdit(id: string | undefined) {
   const qc = useQueryClient()
   return useMutation({

@@ -37,6 +37,25 @@
   --font-sans: var(--font-jost), system-ui, -apple-system, sans-serif;
 }
 
+/* ── Dark mode ─────────────────────────────────────────────────
+   Follows the OS/browser preference automatically (no in-app toggle).
+   A warm dark palette — deep espresso canvas, cream text — rather than
+   pure black; the brass accent is unchanged so the brand reads the same
+   in either mode. */
+@media (prefers-color-scheme: dark) {
+  .admin-scope {
+    --cream: #201810;
+    --brown: #F3EBDE;
+
+    --surface: #2C2117;
+    --surface-alt: #362A1D;
+    --border-hairline: #4A3B2A;
+    --chip-bg: #423424;
+    --text-muted: #C9B79A;
+    --text-muted-2: #B8A488;
+  }
+}
+
 /* ── Dashboard shell layout mechanics ─────────────────────────── */
 .admin-root {
   background: var(--cream);

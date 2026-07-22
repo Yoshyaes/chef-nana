@@ -14,6 +14,7 @@ import SectionHeader from '@/components/admin/ui/SectionHeader'
 import EmptyState from '@/components/admin/ui/EmptyState'
 import QueryError from '@/components/admin/ui/QueryError'
 import { SkeletonCard } from '@/components/admin/ui/Skeleton'
+import InstallPrompt from '@/components/admin/InstallPrompt'
 
 const priorityDot: Record<string, string> = {
   low: 'var(--text-muted)',
@@ -70,6 +71,8 @@ export default function TodayPage() {
           {refreshing ? 'Refreshing…' : '↓ Pull to refresh'}
         </div>
       )}
+
+      <InstallPrompt />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
