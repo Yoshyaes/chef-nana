@@ -19,7 +19,7 @@ function LoginContent() {
   }
 
   return (
-    <div style={{
+    <div className="admin-scope" style={{
       minHeight: '100vh',
       background: 'var(--cream)',
       display: 'flex',
@@ -81,17 +81,6 @@ function LoginContent() {
           </button>
         </div>
       </div>
-
-      <style>{`
-        :root {
-          --gold: #C9973A;
-          --terracotta: #B85A35;
-          --cream: #F7F1E8;
-          --brown: #2C1A0E;
-          --font-serif: 'Georgia', serif;
-          --font-sans: system-ui, sans-serif;
-        }
-      `}</style>
     </div>
   )
 }

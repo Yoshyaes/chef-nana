@@ -1,0 +1,90 @@
+/*
+ * Lead Studio (admin) design tokens — single source of truth.
+ *
+ * Previously these tokens were declared twice, slightly divergently, in
+ * inline <style> blocks inside app/admin/(dashboard)/layout.tsx and
+ * app/admin/login/page.tsx. Values match the public site's brand tokens
+ * in app/globals.css; var *names* are kept as-is since components/admin/**
+ * already reference them throughout.
+ *
+ * Apply `.admin-scope` anywhere in the admin surface (dashboard shell,
+ * login page) to bring these tokens into scope without leaking them onto
+ * the public marketing site.
+ */
+
+.admin-scope {
+  --gold: #C9973A;
+  --gold-light: #E2B96A;
+  --terracotta: #B85A35;
+  --green-dark: #2D5F3D;
+  --cream: #F7F1E8;
+  --brown: #2C1A0E;
+
+  /* Semantic tokens added for the mobile redesign */
+  --surface: #FFFFFF;
+  --surface-alt: #FBF6EE;
+  --border-hairline: #EEE5D7;
+  --chip-bg: #F0E8DB;
+  --text-muted: #9A7D5A;
+  --text-muted-2: #7A6652;
+  --danger: var(--terracotta);
+  --success: var(--green-dark);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-jost), system-ui, -apple-system, sans-serif;
+}
+
+/* ── Dashboard shell layout mechanics ─────────────────────────── */
+.admin-root {
+  background: var(--cream);
+  color: var(--brown);
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  display: flex;
+}
+.admin-root * {
+  box-sizing: border-box;
+}
+.admin-sidebar {
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+.admin-main {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  height: 100%;
+}
+.admin-mobile-header {
+  display: none;
+}
+.admin-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    display: none;
+  }
+  .admin-main {
+    padding: 16px;
+    /* leave room for the fixed tab bar + the home-indicator safe area */
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+  .admin-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
+    border-bottom: 1px solid var(--border-hairline);
+    background: var(--surface);
+    margin: -16px -16px 16px;
+  }
+  .admin-mobile-nav {
+    display: flex;
+  }
+}
