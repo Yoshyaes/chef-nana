@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import MenuCard from '@/components/admin/MenuCard'
 import MenuFilters from '@/components/admin/MenuFilters'
+import Button from '@/components/admin/ui/Button'
+import EmptyState from '@/components/admin/ui/EmptyState'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getSignedMenuPhotoUrls } from '@/lib/supabase/storage'
 
@@ -97,22 +99,11 @@ export default async function MenusPage({
         flexWrap: 'wrap',
         gap: 12,
       }}>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400 }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 500 }}>
           Menus ({menus.length})
         </h1>
         <Link href="/admin/menus/new" style={{ textDecoration: 'none' }}>
-          <button style={{
-            padding: '9px 18px',
-            background: 'var(--gold)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}>
-            + New menu
-          </button>
+          <Button size="sm">+ New menu</Button>
         </Link>
       </div>
 
@@ -125,35 +116,12 @@ export default async function MenusPage({
 
       {/* Grid */}
       {menus.length === 0 ? (
-        <div style={{
-          background: 'var(--cream)',
-          border: '1px dashed #e5d9c9',
-          borderRadius: 16,
-          padding: '64px 32px',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 32, marginBottom: 16, opacity: 0.3 }}>◫</div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--brown)', marginBottom: 8 }}>
-            No menus yet
-          </div>
-          <div style={{ fontSize: 14, color: '#9a7d5a', marginBottom: 24 }}>
-            Add your first menu to start building the library.
-          </div>
-          <Link href="/admin/menus/new" style={{ textDecoration: 'none' }}>
-            <button style={{
-              padding: '10px 20px',
-              background: 'var(--gold)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}>
-              Add first menu
-            </button>
-          </Link>
-        </div>
+        <EmptyState
+          icon="◫"
+          title="No menus yet"
+          subtitle="Add your first menu to start building the library."
+          action={<Link href="/admin/menus/new" style={{ textDecoration: 'none' }}><Button>Add first menu</Button></Link>}
+        />
       ) : (
         <div style={{
           display: 'grid',

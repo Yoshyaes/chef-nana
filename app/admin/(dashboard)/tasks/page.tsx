@@ -1,95 +1,60 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useCurrentProfile } from '@/hooks/useCurrentProfile'
 import { localDateString } from '@/lib/dates'
+import { useTasksList, useProfiles, useAddTask, useToggleTaskDone, type Task, type TaskFilters } from '@/hooks/admin/useTasks'
+import Card from '@/components/admin/ui/Card'
+import Button from '@/components/admin/ui/Button'
+import EmptyState from '@/components/admin/ui/EmptyState'
+import QueryError from '@/components/admin/ui/QueryError'
+import { SkeletonRow } from '@/components/admin/ui/Skeleton'
+import SwipeRow from '@/components/admin/ui/SwipeRow'
 
-interface Profile { id: string; full_name: string; role: string; avatar_color: string }
-interface Task {
-  id: string
-  title: string
-  status: 'open' | 'in_progress' | 'done'
-  priority: 'low' | 'medium' | 'high'
-  owner_id: string
-  due_date: string | null
-  lead: { id: string; name: string } | null
-  menu: { id: string; title: string } | null
-}
-
-const TABS = [
+const TABS: { key: TaskFilters['view']; label: string }[] = [
   { key: 'mine', label: 'My Tasks' },
   { key: 'all', label: 'All' },
   { key: 'overdue', label: 'Overdue' },
-] as const
+]
 
-const PRIORITY_COLORS: Record<string, string> = { low: '#9a7d5a', medium: '#C9973A', high: '#B85A35' }
+const PRIORITY_COLORS: Record<string, string> = { low: 'var(--text-muted)', medium: 'var(--gold)', high: 'var(--danger)' }
 const today = () => localDateString()
 
 export default function TasksPage() {
   const { profile: me } = useCurrentProfile()
-  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('mine')
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [profiles, setProfiles] = useState<Profile[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<TaskFilters['view']>('mine')
   const [ownerFilter, setOwnerFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [showDone, setShowDone] = useState(false)
   const [quickTitle, setQuickTitle] = useState('')
   const [quickOwner, setQuickOwner] = useState('')
   const [quickDue, setQuickDue] = useState('')
-  const [adding, setAdding] = useState(false)
 
-  const profileById = useCallback((id: string) => profiles.find(p => p.id === id), [profiles])
+  const tasksQuery = useTasksList({ view: tab, owner: ownerFilter, status: statusFilter, showDone })
+  const profilesQuery = useProfiles()
+  const addTask = useAddTask()
+  const toggleDone = useToggleTaskDone()
 
-  const loadTasks = useCallback(() => {
-    setLoading(true)
-    const params = new URLSearchParams({ view: tab })
-    if (ownerFilter) params.set('owner', ownerFilter)
-    if (statusFilter) params.set('status', statusFilter)
-    if (showDone) params.set('showDone', 'true')
-    fetch(`/api/admin/tasks?${params}`)
-      .then(r => r.ok ? r.json() : [])
-      .then(setTasks)
-      .finally(() => setLoading(false))
-  }, [tab, ownerFilter, statusFilter, showDone])
+  const tasks = tasksQuery.data ?? []
+  const profiles = profilesQuery.data ?? []
+  const profileById = (id: string) => profiles.find(p => p.id === id)
 
-  useEffect(() => { loadTasks() }, [loadTasks])
+  // Defaults the quick-add owner to "me" once profile loads, without storing
+  // it in state via an effect — quickOwner stays empty until the user picks
+  // someone else, and this derived value fills the gap either way.
+  const effectiveQuickOwner = quickOwner || me?.id || ''
 
-  useEffect(() => {
-    fetch('/api/admin/profiles').then(r => r.ok ? r.json() : []).then(setProfiles)
-  }, [])
-
-  useEffect(() => {
-    if (me && !quickOwner) setQuickOwner(me.id)
-  }, [me, quickOwner])
-
-  async function handleQuickAdd(e: React.FormEvent) {
+  function handleQuickAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!quickTitle.trim()) return
-    setAdding(true)
-    const res = await fetch('/api/admin/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: quickTitle.trim(), owner_id: quickOwner, due_date: quickDue || null }),
+    addTask.mutate({ title: quickTitle.trim(), owner_id: effectiveQuickOwner, due_date: quickDue || null }, {
+      onSuccess: () => { setQuickTitle(''); setQuickDue('') },
     })
-    if (res.ok) {
-      setQuickTitle('')
-      setQuickDue('')
-      loadTasks()
-    }
-    setAdding(false)
   }
 
-  async function toggleDone(task: Task) {
-    const nextStatus = task.status === 'done' ? 'open' : 'done'
-    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: nextStatus } : t))
-    await fetch(`/api/admin/tasks/${task.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: nextStatus }),
-    })
-    loadTasks()
+  function handleToggle(task: Task) {
+    toggleDone.mutate({ id: task.id, status: task.status === 'done' ? 'open' : 'done' })
   }
 
   const isOverdue = (task: Task) => !!task.due_date && task.status !== 'done' && task.due_date < today()
@@ -97,7 +62,7 @@ export default function TasksPage() {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 400 }}>Tasks</h1>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--brown)', fontWeight: 500 }}>Tasks</h1>
       </div>
 
       <form onSubmit={handleQuickAdd} style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -105,12 +70,12 @@ export default function TasksPage() {
           placeholder="Add a task and press Enter…"
           value={quickTitle}
           onChange={e => setQuickTitle(e.target.value)}
-          style={{ flex: 1, minWidth: 200, padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 14, background: '#fff' }}
+          style={{ flex: 1, minWidth: 200, padding: '10px 12px', border: '1px solid var(--border-hairline)', borderRadius: 8, fontSize: 14, background: 'var(--surface)' }}
         />
         <select
-          value={quickOwner}
+          value={effectiveQuickOwner}
           onChange={e => setQuickOwner(e.target.value)}
-          style={{ padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, background: '#fff' }}
+          style={{ padding: '10px 12px', border: '1px solid var(--border-hairline)', borderRadius: 8, fontSize: 13, background: 'var(--surface)' }}
         >
           {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
         </select>
@@ -118,18 +83,12 @@ export default function TasksPage() {
           type="date"
           value={quickDue}
           onChange={e => setQuickDue(e.target.value)}
-          style={{ padding: '10px 12px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 13, background: '#fff' }}
+          style={{ padding: '10px 12px', border: '1px solid var(--border-hairline)', borderRadius: 8, fontSize: 13, background: 'var(--surface)' }}
         />
-        <button
-          type="submit"
-          disabled={adding}
-          style={{ padding: '10px 18px', background: 'var(--brown)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
-        >
-          {adding ? 'Adding…' : '+ Add'}
-        </button>
+        <Button type="submit" disabled={addTask.isPending}>{addTask.isPending ? 'Adding…' : '+ Add'}</Button>
       </form>
 
-      <div style={{ display: 'flex', gap: 4, marginBottom: 12, borderBottom: '1px solid #eee5d7' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 12, borderBottom: '1px solid var(--border-hairline)' }}>
         {TABS.map(t => (
           <button
             key={t.key}
@@ -137,7 +96,7 @@ export default function TasksPage() {
             style={{
               padding: '8px 16px', border: 'none', background: 'none', cursor: 'pointer',
               fontSize: 13, fontWeight: 500,
-              color: tab === t.key ? 'var(--brown)' : '#9a7d5a',
+              color: tab === t.key ? 'var(--brown)' : 'var(--text-muted)',
               borderBottom: tab === t.key ? '2px solid var(--gold)' : '2px solid transparent',
               marginBottom: -1,
             }}
@@ -151,7 +110,7 @@ export default function TasksPage() {
         <select
           value={ownerFilter}
           onChange={e => setOwnerFilter(e.target.value)}
-          style={{ padding: '6px 10px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 12, background: '#fff', color: '#7a6652' }}
+          style={{ padding: '6px 10px', border: '1px solid var(--border-hairline)', borderRadius: 8, fontSize: 12, background: 'var(--surface)', color: 'var(--text-muted-2)' }}
         >
           <option value="">All owners</option>
           {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
@@ -159,82 +118,89 @@ export default function TasksPage() {
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          style={{ padding: '6px 10px', border: '1px solid #e5d9c9', borderRadius: 8, fontSize: 12, background: '#fff', color: '#7a6652' }}
+          style={{ padding: '6px 10px', border: '1px solid var(--border-hairline)', borderRadius: 8, fontSize: 12, background: 'var(--surface)', color: 'var(--text-muted-2)' }}
         >
           <option value="">Any status</option>
           <option value="open">Open</option>
           <option value="in_progress">In progress</option>
           <option value="done">Done</option>
         </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#7a6652' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted-2)' }}>
           <input type="checkbox" checked={showDone} onChange={e => setShowDone(e.target.checked)} />
           Show done
         </label>
       </div>
 
-      {loading ? (
-        <div style={{ color: '#9a7d5a', padding: 40 }}>Loading tasks…</div>
+      {tasksQuery.isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+        </div>
+      ) : tasksQuery.isError ? (
+        <QueryError message="Couldn't load tasks." onRetry={() => tasksQuery.refetch()} />
+      ) : tasks.length === 0 ? (
+        <EmptyState
+          icon="☑"
+          title="Nothing here"
+          subtitle={tab === 'mine' ? 'No open tasks assigned to you.' : tab === 'overdue' ? 'Nothing overdue.' : 'No tasks yet.'}
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {tasks.map(task => {
             const owner = profileById(task.owner_id)
             const overdue = isOverdue(task)
             return (
-              <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: '1px solid #eee5d7', borderRadius: 10, padding: '12px 16px' }}>
-                <button
-                  onClick={() => toggleDone(task)}
-                  aria-label="Toggle done"
-                  style={{
-                    width: 20, height: 20, borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
-                    border: `2px solid ${task.status === 'done' ? '#2D5F3D' : '#e5d9c9'}`,
-                    background: task.status === 'done' ? '#2D5F3D' : 'transparent',
-                    color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  {task.status === 'done' ? '✓' : ''}
-                </button>
+              <SwipeRow key={task.id} onSwipeRight={() => handleToggle(task)} rightLabel={task.status === 'done' ? '↺ Reopen' : '✓ Complete'}>
+                <Card style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                  <button
+                    onClick={() => handleToggle(task)}
+                    aria-label="Toggle done"
+                    style={{
+                      width: 20, height: 20, borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
+                      border: `2px solid ${task.status === 'done' ? 'var(--success)' : 'var(--border-hairline)'}`,
+                      background: task.status === 'done' ? 'var(--success)' : 'transparent',
+                      color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    {task.status === 'done' ? '✓' : ''}
+                  </button>
 
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLORS[task.priority], flexShrink: 0 }} />
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLORS[task.priority], flexShrink: 0 }} />
 
-                <Link href={`/admin/tasks/${task.id}`} style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
-                  <div style={{
-                    fontSize: 14, color: 'var(--brown)', fontWeight: 500,
-                    textDecoration: task.status === 'done' ? 'line-through' : 'none',
-                    opacity: task.status === 'done' ? 0.5 : 1,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
-                    {task.title}
-                  </div>
-                </Link>
+                  <Link href={`/admin/tasks/${task.id}`} style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
+                    <div style={{
+                      fontSize: 14, color: 'var(--brown)', fontWeight: 500,
+                      textDecoration: task.status === 'done' ? 'line-through' : 'none',
+                      opacity: task.status === 'done' ? 0.5 : 1,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {task.title}
+                    </div>
+                  </Link>
 
-                {(task.lead || task.menu) && (
-                  <span style={{ fontSize: 11, background: '#f5ede0', color: '#7a6652', padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>
-                    {task.lead ? task.lead.name : task.menu?.title}
-                  </span>
-                )}
+                  {(task.lead || task.menu) && (
+                    <span style={{ fontSize: 11, background: 'var(--chip-bg)', color: 'var(--text-muted-2)', padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>
+                      {task.lead ? task.lead.name : task.menu?.title}
+                    </span>
+                  )}
 
-                {owner && (
-                  <span title={owner.full_name} style={{
-                    width: 24, height: 24, borderRadius: '50%', background: owner.avatar_color, color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, flexShrink: 0,
-                  }}>
-                    {owner.full_name.charAt(0).toUpperCase()}
-                  </span>
-                )}
+                  {owner && (
+                    <span title={owner.full_name} style={{
+                      width: 24, height: 24, borderRadius: '50%', background: owner.avatar_color, color: '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, flexShrink: 0,
+                    }}>
+                      {owner.full_name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
 
-                {task.due_date && (
-                  <span style={{ fontSize: 12, color: overdue ? '#B85A35' : '#9a7d5a', fontWeight: overdue ? 600 : 400, flexShrink: 0, width: 70, textAlign: 'right' }}>
-                    {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                  </span>
-                )}
-              </div>
+                  {task.due_date && (
+                    <span style={{ fontSize: 12, color: overdue ? 'var(--danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400, flexShrink: 0, width: 70, textAlign: 'right' }}>
+                      {new Date(task.due_date + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </Card>
+              </SwipeRow>
             )
           })}
-          {tasks.length === 0 && (
-            <div style={{ padding: 32, textAlign: 'center', color: '#9a7d5a', fontSize: 14 }}>
-              {tab === 'mine' ? 'No open tasks assigned to you.' : tab === 'overdue' ? 'Nothing overdue.' : 'No tasks yet.'}
-            </div>
-          )}
         </div>
       )}
     </div>

@@ -12,6 +12,7 @@ import AddLeadSheet from '@/components/admin/AddLeadSheet'
 import SwipeRow from '@/components/admin/ui/SwipeRow'
 import Button from '@/components/admin/ui/Button'
 import SearchBar from '@/components/admin/ui/SearchBar'
+import QueryError from '@/components/admin/ui/QueryError'
 import { SkeletonCard } from '@/components/admin/ui/Skeleton'
 
 export default function PipelinePage() {
@@ -81,6 +82,8 @@ export default function PipelinePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
+          ) : leadsQuery.isError ? (
+            <QueryError message="Couldn't load the pipeline." onRetry={() => leadsQuery.refetch()} />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filtered.filter(l => l.stage === mobileStage).map(lead => (

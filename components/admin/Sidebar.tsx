@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import { useCurrentProfile } from '@/hooks/useCurrentProfile'
 import { createClient } from '@/lib/supabase/client'
 import { useDraftsList } from '@/hooks/admin/useDrafts'
+import { useApiSpend } from '@/hooks/admin/useApiSpend'
 
 const navItems = [
   { label: 'Today', href: '/admin/today', icon: '◎', showDraftBadge: false },
@@ -27,7 +27,7 @@ const toolItems = [
 export default function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
   const draftCount = useDraftsList().data?.length ?? 0
-  const [spend, setSpend] = useState<{ current: number; cap: number }>({ current: 0, cap: 25 })
+  const spend = useApiSpend().data ?? { current: 0, cap: 25 }
   const { profile } = useCurrentProfile()
 
   async function handleSignOut() {
@@ -35,13 +35,6 @@ export default function AdminSidebar({ className }: { className?: string }) {
     await supabase.auth.signOut()
     window.location.href = '/admin/login'
   }
-
-  useEffect(() => {
-    fetch('/api/admin/settings')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setSpend({ current: d.current_month_spend ?? 0, cap: d.monthly_budget_cap ?? 25 }) })
-      .catch(() => {})
-  }, [pathname])
 
   const spendPct = Math.min(100, (spend.current / spend.cap) * 100)
 

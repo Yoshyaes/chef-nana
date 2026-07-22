@@ -13,6 +13,7 @@ import SwipeRow from '@/components/admin/ui/SwipeRow'
 import Button from '@/components/admin/ui/Button'
 import SearchBar from '@/components/admin/ui/SearchBar'
 import EmptyState from '@/components/admin/ui/EmptyState'
+import QueryError from '@/components/admin/ui/QueryError'
 import { StagePill } from '@/components/admin/ui/Chip'
 import { SkeletonCard } from '@/components/admin/ui/Skeleton'
 
@@ -65,6 +66,8 @@ export default function LeadsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
+      ) : leadsQuery.isError ? (
+        <QueryError message="Couldn't load leads." onRetry={() => leadsQuery.refetch()} />
       ) : filtered.length === 0 && leads.length === 0 ? (
         <EmptyState icon="◈" title="No leads yet" subtitle="Add your first lead, or import from Gmail / Apollo in Settings." action={<Button onClick={() => setShowAddSheet(true)}>+ Add lead</Button>} />
       ) : filtered.length === 0 ? (

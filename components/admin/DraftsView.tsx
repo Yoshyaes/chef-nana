@@ -18,6 +18,7 @@ import Card from '@/components/admin/ui/Card'
 import SearchBar from '@/components/admin/ui/SearchBar'
 import EmptyState from '@/components/admin/ui/EmptyState'
 import { SkeletonRow } from '@/components/admin/ui/Skeleton'
+import QueryError from '@/components/admin/ui/QueryError'
 import type { DraftListItem } from '@/hooks/admin/useDrafts'
 
 const EMPTY_DRAFTS: DraftListItem[] = []
@@ -206,11 +207,13 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
       <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {draftsQuery.isLoading && Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
 
-        {!draftsQuery.isLoading && filtered.length === 0 && drafts.length === 0 && (
+        {draftsQuery.isError && <QueryError message="Couldn't load drafts." onRetry={() => draftsQuery.refetch()} />}
+
+        {!draftsQuery.isLoading && !draftsQuery.isError && filtered.length === 0 && drafts.length === 0 && (
           <EmptyState icon="✦" title="No pending drafts" subtitle="New AI-drafted replies will show up here as they're generated." />
         )}
 
-        {!draftsQuery.isLoading && filtered.length === 0 && drafts.length > 0 && (
+        {!draftsQuery.isLoading && !draftsQuery.isError && filtered.length === 0 && drafts.length > 0 && (
           <div style={{ padding: '24px 4px', color: 'var(--text-muted)', fontSize: 13, textAlign: 'center' }}>
             No drafts match &ldquo;{search}&rdquo;.
           </div>

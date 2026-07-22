@@ -12,6 +12,7 @@ import Button from '@/components/admin/ui/Button'
 import StatTile from '@/components/admin/ui/StatTile'
 import SectionHeader from '@/components/admin/ui/SectionHeader'
 import EmptyState from '@/components/admin/ui/EmptyState'
+import QueryError from '@/components/admin/ui/QueryError'
 import { SkeletonCard } from '@/components/admin/ui/Skeleton'
 
 const priorityDot: Record<string, string> = {
@@ -107,6 +108,8 @@ export default function TodayPage() {
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
           {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
+      ) : triageQuery.isError ? (
+        <QueryError message="Couldn't load the brief." onRetry={() => triageQuery.refetch()} />
       ) : !triage ? (
         <EmptyState
           icon="☀"
