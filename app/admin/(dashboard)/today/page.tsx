@@ -1,41 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { localDateString } from '@/lib/dates'
-
-interface DueTodayTask {
-  id: string
-  title: string
-  priority: 'low' | 'medium' | 'high'
-}
+import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { useTriage, useRegenerateTriage, useDueTodayTasks, type Triage } from '@/hooks/admin/useToday'
+import { useApproveDraft } from '@/hooks/admin/useDrafts'
+import Card from '@/components/admin/ui/Card'
+import Button from '@/components/admin/ui/Button'
+import StatTile from '@/components/admin/ui/StatTile'
+import SectionHeader from '@/components/admin/ui/SectionHeader'
+import EmptyState from '@/components/admin/ui/EmptyState'
+import { SkeletonCard } from '@/components/admin/ui/Skeleton'
 
 const priorityDot: Record<string, string> = {
-  low: '#9a7d5a',
-  medium: '#C9973A',
-  high: '#B85A35',
-}
-
-interface TriageAction {
-  priority: 'hot' | 'warm' | 'cool'
-  type: string
-  title: string
-  description: string
-  leadId?: string
-  draftId?: string
-}
-
-interface Triage {
-  tldr: string
-  actions: TriageAction[]
-  stats: { hotReplies: number; draftsToApprove: number; followUpsDue: number; activeLeads: number }
-  generated_at: string
-}
-
-const priorityColor: Record<string, string> = {
-  hot: '#B85A35',
-  warm: '#C9973A',
-  cool: '#7a6652',
+  low: 'var(--text-muted)',
+  medium: 'var(--gold)',
+  high: 'var(--danger)',
+  hot: 'var(--danger)',
+  warm: 'var(--gold)',
+  cool: 'var(--text-muted)',
 }
 
 const typeLabel: Record<string, string> = {
@@ -46,165 +31,152 @@ const typeLabel: Record<string, string> = {
 }
 
 export default function TodayPage() {
-  const [triage, setTriage] = useState<Triage | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
-  const [dueToday, setDueToday] = useState<DueTodayTask[]>([])
+  const isMobile = useIsMobile()
+  const qc = useQueryClient()
+  const [approvingDraftId, setApprovingDraftId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch('/api/admin/triage')
-      .then(r => r.ok ? r.json() : null)
-      .then(setTriage)
-      .finally(() => setLoading(false))
-  }, [])
+  const triageQuery = useTriage()
+  const regenerate = useRegenerateTriage()
+  const dueTodayQuery = useDueTodayTasks()
+  const approve = useApproveDraft()
 
-  useEffect(() => {
-    fetch('/api/admin/tasks?view=mine')
-      .then(r => r.ok ? r.json() : [])
-      .then((tasks: { id: string; title: string; priority: string; due_date: string | null }[]) => {
-        const today = localDateString()
-        setDueToday(tasks.filter(t => t.due_date === today) as DueTodayTask[])
-      })
-      .catch(() => {})
-  }, [])
+  const { pullDistance, refreshing, handlers } = usePullToRefresh(() => regenerate.mutateAsync())
 
-  async function generateTriage() {
-    setGenerating(true)
-    await fetch('/api/admin/triage', { method: 'POST' })
-    setTimeout(() => {
-      fetch('/api/admin/triage').then(r => r.json()).then(setTriage).finally(() => setGenerating(false))
-    }, 8000)
+  const triage = triageQuery.data
+  const dueToday = dueTodayQuery.data ?? []
+  const isRefreshing = regenerate.isPending || refreshing
+
+  function handleApprove(action: NonNullable<Triage['actions']>[number]) {
+    if (!action.draftId) return
+    setApprovingDraftId(action.draftId)
+    approve.mutate(action.draftId, {
+      onSuccess: () => {
+        qc.setQueryData<Triage | null | undefined>(['triage'], prev =>
+          prev ? { ...prev, actions: prev.actions.filter(a => a.draftId !== action.draftId) } : prev
+        )
+      },
+      onSettled: () => setApprovingDraftId(null),
+    })
   }
 
-  if (loading) return <div style={{ color: '#9a7d5a', padding: 40 }}>Loading…</div>
-
   return (
-    <div style={{ maxWidth: 720 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+    <div
+      {...handlers}
+      style={{ maxWidth: 720 }}
+    >
+      {(pullDistance > 0 || refreshing) && (
+        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', height: pullDistance, overflow: 'hidden' }}>
+          {refreshing ? 'Refreshing…' : '↓ Pull to refresh'}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--brown)', fontWeight: 400 }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: isMobile ? 26 : 28, color: 'var(--brown)', fontWeight: 500 }}>
             Good morning, Nana
           </h1>
           {triage?.generated_at && (
-            <div style={{ fontSize: 12, color: '#9a7d5a', marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
               Brief from {new Date(triage.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
         </div>
-        <button
-          onClick={generateTriage}
-          disabled={generating}
-          style={{
-            padding: '8px 16px', background: generating ? '#e5d9c9' : 'var(--gold)',
-            color: generating ? '#9a7d5a' : '#fff', border: 'none', borderRadius: 8,
-            fontSize: 13, cursor: generating ? 'not-allowed' : 'pointer', fontWeight: 500,
-          }}
-        >
-          {generating ? 'Generating…' : 'Refresh brief'}
-        </button>
+        <Button size="sm" variant="ghost" onClick={() => regenerate.mutate()} disabled={isRefreshing}>
+          {isRefreshing ? 'Refreshing…' : '↻ Refresh'}
+        </Button>
       </div>
 
       {dueToday.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
-            Tasks due today
-          </div>
+          <SectionHeader style={{ marginBottom: 12 }}>Tasks due today</SectionHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {dueToday.map(task => (
               <Link key={task.id} href={`/admin/tasks/${task.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: '#fff', border: '1px solid #eee5d7', borderRadius: 10,
-                  padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
-                }}>
+                <Card style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: priorityDot[task.priority] ?? '#ccc', flexShrink: 0 }} />
                   <div style={{ flex: 1, fontSize: 14, color: 'var(--brown)', fontWeight: 500 }}>{task.title}</div>
                   <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 500 }}>View →</span>
-                </div>
+                </Card>
               </Link>
             ))}
           </div>
         </div>
       )}
 
-      {!triage ? (
-        <div style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 32, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--brown)', marginBottom: 8 }}>
-            No brief yet
-          </div>
-          <p style={{ color: '#9a7d5a', fontSize: 14, marginBottom: 20 }}>
-            Add some leads and click &ldquo;Refresh brief&rdquo; to generate your first morning summary.
-          </p>
+      {(triageQuery.isLoading || isRefreshing) ? (
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
+      ) : !triage ? (
+        <EmptyState
+          icon="☀"
+          title="No brief yet"
+          subtitle="Add some leads and refresh the brief to generate your first morning summary."
+          action={<Button onClick={() => regenerate.mutate()}>Refresh brief</Button>}
+        />
       ) : (
         <>
           {triage.stats && (
-            <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-              {[
-                { label: 'Hot replies', value: triage.stats.hotReplies, color: '#B85A35' },
-                { label: 'Drafts to approve', value: triage.stats.draftsToApprove, color: '#C9973A' },
-                { label: 'Follow-ups due', value: triage.stats.followUpsDue, color: '#7a6652' },
-                { label: 'Active leads', value: triage.stats.activeLeads, color: '#2D5F3D' },
-              ].map(s => (
-                <div key={s.label} style={{
-                  flex: 1, background: '#fff', border: '1px solid #eee5d7',
-                  borderRadius: 10, padding: '14px 16px', textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: 24, fontWeight: 600, color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: '#9a7d5a', marginTop: 2 }}>{s.label}</div>
-                </div>
-              ))}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 10, marginBottom: 18 }}>
+              <Link href="/admin/drafts" style={{ textDecoration: 'none' }}>
+                <StatTile value={triage.stats.hotReplies} label="Hot replies" />
+              </Link>
+              <Link href="/admin/drafts" style={{ textDecoration: 'none' }}>
+                <StatTile value={triage.stats.draftsToApprove} label="Drafts to approve" accent />
+              </Link>
+              <Link href="/admin/tasks" style={{ textDecoration: 'none' }}>
+                <StatTile value={triage.stats.followUpsDue} label="Follow-ups due" />
+              </Link>
+              <Link href="/admin/leads" style={{ textDecoration: 'none' }}>
+                <StatTile value={triage.stats.activeLeads} label="Active leads" />
+              </Link>
             </div>
           )}
 
-          <div style={{
-            background: '#fff', border: '1px solid #eee5d7', borderRadius: 12,
-            padding: 24, marginBottom: 24,
-          }}>
-            <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
-              TLDR
-            </div>
+          <Card style={{ padding: 20, marginBottom: 18 }}>
+            <SectionHeader style={{ marginBottom: 8 }}>TL;DR</SectionHeader>
             <p style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--brown)', lineHeight: 1.7 }}>
               {triage.tldr}
             </p>
-          </div>
+          </Card>
 
           {triage.actions?.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, color: '#9a7d5a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
-                Needs you first
-              </div>
+              <SectionHeader style={{ marginBottom: 12, paddingLeft: 2 }}>Needs you first</SectionHeader>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {triage.actions.map((action, i) => (
-                  <div key={i} style={{
-                    background: '#fff', border: '1px solid #eee5d7', borderRadius: 10,
-                    padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
-                  }}>
-                    <div style={{
-                      width: 8, height: 8, borderRadius: '50%',
-                      background: priorityColor[action.priority] ?? '#ccc', flexShrink: 0,
-                    }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, color: 'var(--brown)', fontWeight: 500 }}>{action.title}</div>
-                      <div style={{ fontSize: 12, color: '#9a7d5a', marginTop: 2 }}>{action.description}</div>
+                  <Card key={i} style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: priorityDot[action.priority] ?? '#ccc', flexShrink: 0, marginTop: 5 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <div style={{ fontSize: 14, color: 'var(--brown)', fontWeight: 600 }}>{action.title}</div>
+                          <span style={{ fontSize: 10.5, color: priorityDot[action.priority], background: 'var(--chip-bg)', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>
+                            {typeLabel[action.type] ?? action.type}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 12.5, color: 'var(--text-muted-2)', marginTop: 3, lineHeight: 1.45 }}>
+                          {action.description}
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                          {action.draftId && (
+                            <Button size="sm" variant="green" onClick={() => handleApprove(action)} disabled={approvingDraftId === action.draftId}>
+                              {approvingDraftId === action.draftId ? 'Approving…' : 'Approve'}
+                            </Button>
+                          )}
+                          {action.draftId ? (
+                            <Link href={`/admin/drafts/${action.draftId}`}>
+                              <Button size="sm" variant="ghost">Review →</Button>
+                            </Link>
+                          ) : action.leadId ? (
+                            <Link href={`/admin/leads/${action.leadId}`}>
+                              <Button size="sm" variant="ghost">View →</Button>
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{
-                      fontSize: 11, color: priorityColor[action.priority] ?? '#ccc',
-                      background: `${priorityColor[action.priority]}18`,
-                      padding: '3px 8px', borderRadius: 6, fontWeight: 500,
-                    }}>
-                      {typeLabel[action.type] ?? action.type}
-                    </div>
-                    {action.draftId && (
-                      <a href={`/admin/drafts?highlight=${action.draftId}`} style={{
-                        fontSize: 12, color: 'var(--gold)', textDecoration: 'none', fontWeight: 500,
-                      }}>Review →</a>
-                    )}
-                    {action.leadId && !action.draftId && (
-                      <a href={`/admin/leads/${action.leadId}`} style={{
-                        fontSize: 12, color: 'var(--gold)', textDecoration: 'none', fontWeight: 500,
-                      }}>View →</a>
-                    )}
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>

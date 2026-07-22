@@ -123,7 +123,7 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
   const saveEdit = useSaveDraftEdit(selectedId)
   const redraft = useRedraftDraft(selectedId)
 
-  const { containerRef, pullDistance, refreshing, handlers } = usePullToRefresh(() => draftsQuery.refetch())
+  const { pullDistance, refreshing, handlers } = usePullToRefresh(() => draftsQuery.refetch())
 
   const drafts = draftsQuery.data ?? EMPTY_DRAFTS
   const filtered = useMemo(() => {
@@ -184,7 +184,6 @@ export default function DraftsView({ initialId }: { initialId?: string }) {
   // ── List ──────────────────────────────────────────────────────
   const DraftList = (
     <div
-      ref={containerRef}
       {...handlers}
       style={{
         background: 'var(--surface-alt)',

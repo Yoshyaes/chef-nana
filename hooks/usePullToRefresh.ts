@@ -5,21 +5,30 @@ import { useRef, useState, useCallback } from 'react'
 const TRIGGER_DISTANCE = 64
 const MAX_PULL = 96
 
+function isScrolledToTop(target: EventTarget | null): boolean {
+  let el = target instanceof HTMLElement ? target : null
+  while (el) {
+    if (el.scrollHeight > el.clientHeight) {
+      const overflowY = getComputedStyle(el).overflowY
+      if (overflowY === 'auto' || overflowY === 'scroll') return el.scrollTop <= 0
+    }
+    el = el.parentElement
+  }
+  return true
+}
+
 // Hand-rolled rather than a library: only needs to trigger a refetch when the
 // user pulls down from the top of a scroll container, which is a small,
-// self-contained touch-event state machine.
+// self-contained touch-event state machine. Walks up from the touch target to
+// find the actual scrolling ancestor (usually the shared .admin-main layout
+// element, not the page's own wrapper div) rather than requiring a ref on it.
 export function usePullToRefresh(onRefresh: () => Promise<unknown> | void) {
   const [pullDistance, setPullDistance] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
   const startY = useRef<number | null>(null)
-  const containerRef = useRef<HTMLDivElement | null>(null)
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (containerRef.current && containerRef.current.scrollTop <= 0) {
-      startY.current = e.touches[0].clientY
-    } else {
-      startY.current = null
-    }
+    startY.current = isScrolledToTop(e.target) ? e.touches[0].clientY : null
   }, [])
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
@@ -48,7 +57,6 @@ export function usePullToRefresh(onRefresh: () => Promise<unknown> | void) {
   }, [pullDistance, refreshing])
 
   return {
-    containerRef,
     pullDistance,
     refreshing,
     handlers: { onTouchStart, onTouchMove, onTouchEnd },

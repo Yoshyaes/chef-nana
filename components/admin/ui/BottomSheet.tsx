@@ -17,7 +17,13 @@ export default function BottomSheet({
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
         <Drawer.Overlay style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 300 }} />
+        {/* admin-scope is re-applied here because vaul portals Content to
+            document.body, escaping the .admin-scope div that defines every
+            --token this file (and its children) rely on — without it,
+            var(--surface) etc. resolve to nothing and the sheet renders
+            with a transparent background. */}
         <Drawer.Content
+          className="admin-scope"
           style={{
             position: 'fixed',
             bottom: 0,
