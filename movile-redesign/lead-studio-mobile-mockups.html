@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Studio — Mobile Mockups</title>
+<!--
+  DESIGN RATIONALE
+  Product: Lead Studio (Georgina's Assistant) — native iOS/Android app for an AI lead + email manager.
+  Aesthetic direction: "Editorial warmth, native bones." The existing web brand is warm cream + brass +
+  editorial serif; these mockups reproduce that established brand (brief = brand continuity) but rebuild the
+  layout with true mobile-native architecture: bottom tab bar, safe areas, card units, swipe actions, sticky
+  action bars, skeletons. Comps studied: Superhuman (fast triage + sticky actions), Attio/Folk (mobile CRM
+  cards), Linear mobile (calm density). Serif (Newsreader) is reserved for display headers only; all UI chrome
+  uses a native system stack so controls read as OS-native, not web.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#F4EEE4; --surface:#FFFDF9; --surface-2:#FBF6EE; --surface-alt:#EFE7DA;
+  --brass:#B0872F; --brass-bright:#C79A3E; --green:#3E6B4E; --danger:#9B4A3A;
+  --text:#2A2320; --muted:#A2896A; --muted-2:#8C765C; --hairline:#E7DDCE; --chip:#EDE4D6;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  --serif:"Newsreader",Georgia,serif;
+  --shadow:0 1px 2px rgba(42,35,32,.04),0 6px 20px rgba(42,35,32,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+body{background:#211c19;background-image:radial-gradient(circle at 20% 0%,#2b2420,#1a1613);color:#e8ded1;font-family:var(--sans);padding:48px 24px 80px;}
+.page-head{max-width:1200px;margin:0 auto 44px;text-align:center;}
+.page-head h1{font-family:var(--serif);font-weight:500;font-size:38px;letter-spacing:-.5px;color:#f3ebde;}
+.page-head h1 em{font-style:italic;color:var(--brass-bright);}
+.page-head p{margin-top:12px;color:#b7a794;font-size:15px;line-height:1.6;max-width:680px;margin-left:auto;margin-right:auto;}
+.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:20px;font-size:12.5px;color:#a99a86;}
+.legend span{display:inline-flex;align-items:center;gap:7px;}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.section-label{max-width:1200px;margin:56px auto 8px;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#8a7a67;font-weight:600;padding-left:6px;}
+.section-rule{max-width:1200px;margin:0 auto 28px;border-top:1px solid #3a322c;}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:44px 34px;justify-items:center;}
+.frame-wrap{display:flex;flex-direction:column;align-items:center;width:100%;}
+.caption{margin-top:16px;text-align:center;max-width:300px;}
+.caption b{color:#efe6d8;font-size:14px;font-weight:600;font-family:var(--sans);}
+.caption span{display:block;color:#9c8d79;font-size:12.5px;line-height:1.5;margin-top:4px;}
+
+/* ---------- phone frame ---------- */
+.phone{width:330px;height:714px;background:#000;border-radius:46px;padding:11px;box-shadow:0 0 0 2px #342f2a,0 24px 60px rgba(0,0,0,.5);flex:none;}
+.screen{position:relative;width:100%;height:100%;background:var(--canvas);border-radius:36px;overflow:hidden;display:flex;flex-direction:column;}
+.island{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#000;border-radius:16px;z-index:40;}
+.statusbar{height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-size:13px;font-weight:600;color:var(--text);z-index:30;}
+.statusbar .sb-r{display:flex;align-items:center;gap:6px;}
+.statusbar svg{display:block;}
+.body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.scroll{flex:1;overflow:hidden;padding:0 18px;}
+.scroll.pt{padding-top:6px;}
+
+/* app header */
+.apphead{padding:6px 18px 12px;flex:none;}
+.eyebrow{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.h-disp{font-family:var(--serif);font-weight:500;color:var(--text);letter-spacing:-.3px;line-height:1.05;}
+.h1{font-size:29px;} .h2{font-size:23px;}
+.sub{color:var(--muted-2);font-size:12.5px;margin-top:3px;}
+.row-between{display:flex;align-items:center;justify-content:space-between;}
+
+/* buttons */
+.btn{border:none;border-radius:12px;font-family:var(--sans);font-weight:600;font-size:13.5px;padding:11px 15px;cursor:default;}
+.btn-brass{background:var(--brass);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-ghost{background:transparent;color:var(--muted-2);border:1px solid var(--hairline);}
+.btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid #e3cfc7;}
+.btn-sm{padding:8px 13px;border-radius:10px;font-size:12.5px;}
+.btn-pill{background:var(--surface);border:1px solid var(--hairline);color:var(--text);border-radius:100px;padding:7px 14px;font-size:12.5px;font-weight:600;}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow);}
+.pad{padding:14px;}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow);}
+.tile .num{font-family:var(--serif);font-size:27px;font-weight:500;color:var(--text);line-height:1;}
+.tile .num.brass{color:var(--brass);}
+.tile .lbl{font-size:11px;color:var(--muted-2);margin-top:6px;letter-spacing:.2px;}
+
+/* chips / pills */
+.chip{display:inline-block;background:var(--chip);color:var(--muted-2);font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:7px;letter-spacing:.2px;}
+.stage{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:4px 9px;border-radius:100px;}
+.stage-sourced{background:#efe7d6;color:#9a7a3f;}
+.stage-contacted{background:#e2e8ea;color:#4a6a72;}
+.stage-neg{background:#e9e0ef;color:#6b5488;}
+.stage-won{background:#dfeadf;color:#3E6B4E;}
+.pilldot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* list rows */
+.drow{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:12px 13px;box-shadow:var(--shadow);}
+.drow .from{font-weight:600;font-size:13.5px;color:var(--text);}
+.drow .subj{font-size:12.5px;color:var(--muted-2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.drow .meta{font-size:10.5px;color:var(--muted);margin-top:6px;letter-spacing:.3px;}
+.sep{height:1px;background:var(--hairline);margin:0;}
+
+/* swipe reveal */
+.swipe{position:relative;border-radius:14px;overflow:hidden;}
+.swipe .reveal{position:absolute;inset:0;display:flex;align-items:center;padding:0 18px;font-weight:700;font-size:13px;color:#fff;}
+.reveal.approve{background:var(--green);justify-content:flex-start;}
+.swipe .front{position:relative;transform:translateX(64px);}
+
+/* segmented */
+.seg{display:flex;gap:8px;overflow:hidden;padding:2px 0 12px;}
+.seg .s{font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 2px;border-bottom:2px solid transparent;white-space:nowrap;}
+.seg .s.on{color:var(--text);border-color:var(--brass);}
+.seg .s b{color:var(--brass);}
+
+/* tab bar */
+.tabbar{flex:none;height:78px;background:rgba(251,246,238,.94);backdrop-filter:blur(12px);border-top:1px solid var(--hairline);display:flex;padding:8px 6px 22px;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);position:relative;}
+.tab.on{color:var(--brass);}
+.tab .tl{font-size:10px;font-weight:600;}
+.tab .badge{position:absolute;top:-3px;right:50%;transform:translateX(20px);background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;}
+.tab svg{width:23px;height:23px;}
+
+/* misc */
+.headbar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px;}
+.backchip{display:flex;align-items:center;gap:5px;color:var(--muted-2);font-size:13.5px;font-weight:500;}
+.why{background:var(--surface-alt);border-radius:12px;padding:12px;}
+.why .k{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.why p{font-size:11.5px;line-height:1.5;color:var(--muted-2);margin-top:6px;}
+.actionbar{flex:none;padding:10px 16px 20px;background:linear-gradient(transparent,var(--canvas) 26%);display:flex;gap:8px;}
+.field{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:12px 13px;font-size:13px;color:var(--muted);}
+.settingrow{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:13px 14px;display:flex;align-items:center;justify-content:between;gap:10px;box-shadow:var(--shadow);}
+.toggle{width:42px;height:25px;border-radius:100px;background:var(--green);position:relative;flex:none;}
+.toggle::after{content:"";position:absolute;width:21px;height:21px;border-radius:50%;background:#fff;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.meter{height:6px;border-radius:100px;background:var(--surface-alt);overflow:hidden;}
+.meter i{display:block;height:100%;background:var(--brass);border-radius:100px;}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 24px;}
+.empty .ei{width:52px;height:52px;border-radius:14px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--muted);margin-bottom:14px;}
+.navrow{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);}
+.navrow .ic{width:34px;height:34px;border-radius:9px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--brass);flex:none;}
+.navrow .tt{font-weight:600;font-size:13.5px;color:var(--text);}
+.navrow .ds{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.navrow .ch{margin-left:auto;color:var(--muted);}
+.skel{background:linear-gradient(90deg,var(--surface-alt),#f3ece0,var(--surface-alt));border-radius:8px;}
+.gap6{height:6px;}.gap8{height:8px;}.gap10{height:10px;}.gap12{height:12px;}.gap14{height:14px;}.gap18{height:18px;}
+.stack>*+*{margin-top:10px;}
+.stack12>*+*{margin-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>Lead Studio — <em>Mobile</em></h1>
+  <p>All 14 screens of the native rebuild, in the existing warm brand. Bottom-tab architecture, card units, swipe triage, sticky action bars, and skeleton loading — the visual companion to the PRD. Data shown is pulled from the live <code style="color:#c9a15a">/admin</code> workspace.</p>
+  <div class="legend">
+    <span><i class="dot" style="background:#B0872F"></i>Brass — primary / active</span>
+    <span><i class="dot" style="background:#3E6B4E"></i>Green — approve &amp; send</span>
+    <span><i class="dot" style="background:#9B4A3A"></i>Terracotta — reject</span>
+  </div>
+</div>
+
+<!-- ============ ICON DEFS ============ -->
+<svg width="0" height="0" style="position:absolute"><defs>
+<g id="i-today"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></g></g>
+<g id="i-pipe" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="4.4" height="14" rx="1.4"/><rect x="9.8" y="5" width="4.4" height="10" rx="1.4"/><rect x="16.1" y="5" width="4.4" height="7" rx="1.4"/></g>
+<g id="i-draft" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M4.5 6l7.5 6 7.5-6"/></g>
+<g id="i-leads" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.5l8 4.5-8 4.5-8-4.5Z"/><path d="M4 12l8 4.5 8-4.5" stroke-linecap="round"/></g>
+<g id="i-more" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></g>
+<g id="i-chev" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></g>
+<g id="i-back" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></g>
+</defs></svg>
+
+<!-- reusable status bar + tab bar are inlined per screen for a self-contained file -->
+
+<div class="section-label">Core tabs — daily triage</div>
+<div class="section-rule"></div>
+<div class="grid">
+
+<!-- ============================================================= 1. TODAY -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="apphead"><div class="row-between">
+      <div><div class="h-disp h1">Good morning, Nana</div><div class="sub">Brief from 7:00 AM</div></div>
+      <button class="btn btn-pill">↻ Refresh</button>
+    </div></div>
+    <div class="scroll">
+      <div class="tiles">
+        <div class="tile"><div class="num">0</div><div class="lbl">Hot replies</div></div>
+        <div class="tile"><div class="num brass">100</div><div class="lbl">Drafts to approve</div></div>
+        <div class="tile"><div class="num">0</div><div class="lbl">Follow-ups due</div></div>
+        <div class="tile"><div class="num">71</div><div class="lbl">Active leads</div></div>
+      </div>
+      <div class="gap14"></div>
+      <div class="card pad">
+        <div class="eyebrow">TL;DR</div>
+        <p style="font-size:12.5px;line-height:1.55;color:var(--muted-2);margin-top:7px">100 drafts sitting in approval limbo — mostly low-signal noise. Real priorities: <b style="color:var(--text)">Rashida Ricketts</b> (supper club tomorrow), <b style="color:var(--text)">Rachel Laryea</b> (August dinner), and <b style="color:var(--text)">Sanctuary</b> (retreat via Paolo Velez).</p>
+      </div>
+      <div class="gap14"></div>
+      <div class="eyebrow" style="padding-left:2px">Needs you first</div>
+      <div class="gap8"></div>
+      <div class="stack">
+        <div class="card pad">
+          <div style="display:flex;gap:8px"><span class="pilldot" style="color:var(--brass);margin-top:5px"></span>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--text)">Rashida Ricketts — Fitler Supper Club</div>
+          <div style="font-size:11.5px;color:var(--muted-2);margin-top:3px;line-height:1.45">Event is tomorrow. Consolidate the pending replies and confirm final details now.</div>
+          <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-green btn-sm">Approve</button><button class="btn btn-ghost btn-sm">Review →</button></div></div></div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;gap:8px"><span class="pilldot" style="color:var(--brass);margin-top:5px"></span>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--text)">Rachel Laryea — August Dinner</div>
+          <div style="font-size:11.5px;color:var(--muted-2);margin-top:3px;line-height:1.45">Four drafts on one inquiry. Settle on one coherent response and send.</div>
+          <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-green btn-sm">Approve</button><button class="btn btn-ghost btn-sm">Review →</button></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab on"><svg viewBox="0 0 24 24"><use href="#i-today"/></svg><span class="tl">Today</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-pipe"/></svg><span class="tl">Pipeline</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-draft"/></svg><span class="badge">101</span><span class="tl">Drafts</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-leads"/></svg><span class="tl">Leads</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-more"/></svg><span class="tl">More</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>1 · Today</b><span>Morning brief: stat tiles, AI TL;DR, tap-to-approve priority cards.</span></div>
+</div>
+
+<!-- ============================================================= 2. PIPELINE -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="apphead"><div class="row-between">
+      <div class="h-disp h1">Pipeline</div>
+      <button class="btn btn-brass btn-sm">+ Add lead</button>
+    </div></div>
+    <div style="padding:0 18px">
+      <div class="seg">
+        <span class="s on">Sourced <b>72</b></span>
+        <span class="s">Contacted 0</span>
+        <span class="s">Responded 0</span>
+        <span class="s">Negotiating 0</span>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="stack">
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Fred Test</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">Test Co</div>
+          <div style="margin-top:9px;display:flex;gap:6px"><span class="chip">one-off</span><span class="chip">Corporate events</span></div>
+        </div><span class="stage stage-sourced"><span class="pilldot"></span>Sourced</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Rachel Laryea</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">August dinner event</div>
+        </div><span class="stage stage-sourced"><span class="pilldot"></span>Sourced</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Rashida Ricketts</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">Fitler Supper Club</div>
+        </div><span class="stage stage-sourced"><span class="pilldot"></span>Sourced</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Caitlin at Kit</div>
+        </div><span class="stage stage-sourced"><span class="pilldot"></span>Sourced</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Fly By Jing</div>
+        </div><span class="stage stage-sourced"><span class="pilldot"></span>Sourced</span></div></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-today"/></svg><span class="tl">Today</span></div>
+      <div class="tab on"><svg viewBox="0 0 24 24"><use href="#i-pipe"/></svg><span class="tl">Pipeline</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-draft"/></svg><span class="badge">101</span><span class="tl">Drafts</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-leads"/></svg><span class="tl">Leads</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-more"/></svg><span class="tl">More</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>2 · Pipeline</b><span>Kanban → swipeable stage pager. One stage of cards at a time; tap pill to move.</span></div>
+</div>
+
+<!-- ============================================================= 3. DRAFTS LIST -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="apphead"><div class="row-between">
+      <div class="h-disp h1">Drafts <span style="color:var(--muted);font-size:18px">101</span></div>
+      <button class="btn btn-pill">⌕ Search</button>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:12px"><span class="chip" style="background:var(--brass);color:#fff">All</span><span class="chip">Booking</span><span class="chip">Noise</span></div>
+    </div>
+    <div class="scroll">
+      <div class="stack">
+        <!-- swiped row showing approve -->
+        <div class="swipe">
+          <div class="reveal approve">✓ Approve</div>
+          <div class="front"><div class="drow" style="border-radius:14px">
+            <div class="from">Rashida Ricketts</div>
+            <div class="subj">Re: Supper Club at Fitler // July 23rd</div>
+            <div class="meta">EMAIL · PENDING</div>
+          </div></div>
+        </div>
+        <div class="drow"><div class="from">Rachel Laryea</div><div class="subj">Re: August dinner event</div><div class="meta">EMAIL · PENDING</div></div>
+        <div class="drow"><div class="from">Sanctuary</div><div class="subj">Re: Sanctuary Retreat — a culinary invitation</div><div class="meta">EMAIL · PENDING</div></div>
+        <div class="drow"><div class="from">Fred Test <span style="color:var(--muted);font-weight:400">· Test Co</span></div><div class="subj">Re: Operations Call</div><div class="meta">EMAIL · PENDING</div></div>
+        <div class="drow"><div class="from">Booking Inquiry</div><div class="subj">Re: New Booking — Cooking Experience</div><div class="meta">EMAIL · PENDING</div></div>
+        <div class="drow" style="opacity:.6"><div class="from">Vercel</div><div class="subj">Re: New sign-in detected</div><div class="meta">EMAIL · PENDING · NOISE</div></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-today"/></svg><span class="tl">Today</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-pipe"/></svg><span class="tl">Pipeline</span></div>
+      <div class="tab on"><svg viewBox="0 0 24 24"><use href="#i-draft"/></svg><span class="badge">101</span><span class="tl">Drafts</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-leads"/></svg><span class="tl">Leads</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-more"/></svg><span class="tl">More</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>3 · Drafts (list)</b><span>Swipe right → approve, left → reject. Noise filter for one-tap bulk clearing.</span></div>
+</div>
+
+<!-- ============================================================= 4. DRAFT DETAIL -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar">
+      <span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>Drafts</span>
+      <span style="color:var(--brass);font-size:12.5px;font-weight:600">View thread ›</span>
+    </div>
+    <div class="scroll">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:.5px">TO</div>
+      <div style="font-size:13px;color:var(--text);font-weight:500;margin-top:2px">New Booking Inquiry — Cooking Experience</div>
+      <div class="gap12"></div>
+      <div class="why">
+        <div class="k">Why this draft</div>
+        <p>Submission has garbled placeholder data — guest count and location look incomplete. The reply flags it warmly, asks for a clean resubmission, and closes with a concrete next step.</p>
+      </div>
+      <div class="gap14"></div>
+      <div class="eyebrow">Subject</div>
+      <div class="h-disp h2" style="margin-top:3px">Re: New Booking Inquiry</div>
+      <div class="gap12"></div>
+      <div style="font-size:12.5px;line-height:1.6;color:var(--text)">
+        Hi there,<br><br>
+        Thank you for submitting an inquiry through Chef Nana's website. We'd love to learn more about what you have in mind.<br><br>
+        A few details didn't come through clearly — the guest count, location, and event vision. Could you resend those so we can give you an accurate response?<br><br>
+        Best,<br>Jillian Almeida<br><span style="color:var(--muted)">Management | Chef Nana Araba Wilmot</span>
+      </div>
+    </div>
+    <div class="actionbar">
+      <button class="btn btn-green" style="flex:1.4">✓ Approve &amp; send</button>
+      <button class="btn btn-ghost">Edit</button>
+      <button class="btn btn-ghost">↻</button>
+      <button class="btn btn-danger-ghost">Reject</button>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>4 · Draft detail</b><span>Full-screen reader, collapsible AI rationale, sticky action bar above the keyboard.</span></div>
+</div>
+
+<!-- ============================================================= 5. LEADS LIST -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="apphead"><div class="row-between">
+      <div class="h-disp h1">All Leads <span style="color:var(--muted);font-size:18px">72</span></div>
+      <div style="display:flex;gap:7px"><button class="btn btn-pill">↓ Gmail</button><button class="btn btn-brass btn-sm">+</button></div>
+    </div>
+    <div class="field" style="margin-top:12px;padding:9px 12px">⌕ Search leads…</div>
+    </div>
+    <div class="scroll">
+      <div class="stack">
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Fred Test</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">Test Co · Corporate events</div>
+        </div><span class="stage stage-sourced">Sourced</span></div>
+        <div style="margin-top:9px;display:flex;gap:6px"><span class="chip">manual</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Rachel Laryea</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">— · —</div>
+        </div><span class="stage stage-sourced">Sourced</span></div>
+        <div style="margin-top:9px;display:flex;gap:6px"><span class="chip">gmail import</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Rashida Ricketts</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">— · —</div>
+        </div><span class="stage stage-sourced">Sourced</span></div>
+        <div style="margin-top:9px;display:flex;gap:6px"><span class="chip">gmail import</span></div></div>
+        <div class="card pad"><div class="row-between"><div>
+          <div style="font-weight:600;font-size:14px;color:var(--text)">Sanctuary</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:1px">— · —</div>
+        </div><span class="stage stage-sourced">Sourced</span></div>
+        <div style="margin-top:9px;display:flex;gap:6px"><span class="chip">gmail import</span></div></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-today"/></svg><span class="tl">Today</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-pipe"/></svg><span class="tl">Pipeline</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-draft"/></svg><span class="badge">101</span><span class="tl">Drafts</span></div>
+      <div class="tab on"><svg viewBox="0 0 24 24"><use href="#i-leads"/></svg><span class="tl">Leads</span></div>
+      <div class="tab"><svg viewBox="0 0 24 24"><use href="#i-more"/></svg><span class="tl">More</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>5 · Leads (list)</b><span>7-column table → cards. No horizontal scroll; Gmail import + search up top.</span></div>
+</div>
+
+<!-- ============================================================= 6. LEAD DETAIL -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar">
+      <span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>Leads</span>
+      <span style="color:var(--brass);font-size:12.5px;font-weight:600">Edit</span>
+    </div>
+    <div class="scroll">
+      <div class="h-disp h1">Fred Test</div>
+      <div class="sub">Test Co</div>
+      <div style="margin-top:11px;display:flex;gap:7px;align-items:center"><span class="stage stage-sourced">Sourced</span><span class="chip">one-off</span><span class="chip">Corporate events</span></div>
+      <div class="gap14"></div>
+      <div class="card" style="padding:2px 14px">
+        <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--hairline)"><span style="font-size:12.5px;color:var(--muted-2)">Market</span><span style="font-size:12.5px;color:var(--text);font-weight:500">Corporate events</span></div>
+        <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--hairline)"><span style="font-size:12.5px;color:var(--muted-2)">Fit</span><span style="font-size:12.5px;color:var(--text);font-weight:500">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--hairline)"><span style="font-size:12.5px;color:var(--muted-2)">Value / yr</span><span style="font-size:12.5px;color:var(--text);font-weight:500">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:11px 0"><span style="font-size:12.5px;color:var(--muted-2)">Source</span><span style="font-size:12.5px;color:var(--text);font-weight:500">manual</span></div>
+      </div>
+      <div class="gap14"></div>
+      <div class="eyebrow" style="padding-left:2px">Drafts &amp; emails</div>
+      <div class="gap8"></div>
+      <div class="drow"><div class="from">Re: Operations Call</div><div class="meta">EMAIL · PENDING</div></div>
+      <div class="gap8"></div>
+      <div class="drow"><div class="from">Re: Custom menu — 100 people</div><div class="meta">EMAIL · PENDING</div></div>
+      <div class="gap12"></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-brass btn-sm" style="flex:1">＋ Add task</button><button class="btn btn-ghost btn-sm" style="flex:1">✎ Generate draft</button></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>6 · Lead detail</b><span>New screen (web has none): profile, fields, related drafts/tasks, quick actions.</span></div>
+</div>
+
+</div><!-- /grid -->
+
+<div class="section-label">Tools &amp; system</div>
+<div class="section-rule"></div>
+<div class="grid">
+
+<!-- ============================================================= 7. TASKS -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><span></span></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Tasks</div></div>
+    <div style="padding:0 18px"><div class="field">＋ Add a task…</div>
+      <div style="display:flex;gap:7px;margin-top:11px"><span class="chip" style="background:var(--brass);color:#fff">My Tasks</span><span class="chip">All</span><span class="chip">Overdue</span></div>
+    </div>
+    <div class="scroll" style="padding-top:14px">
+      <div class="stack">
+        <div class="card pad" style="display:flex;gap:11px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.6px solid var(--hairline);flex:none;margin-top:1px"></div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">Confirm Fitler terrace arrival window</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Jillian · due today</div></div></div>
+        <div class="card pad" style="display:flex;gap:11px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.6px solid var(--hairline);flex:none;margin-top:1px"></div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">Send Rachel the August menu options</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Fred · in progress</div></div></div>
+        <div class="card pad" style="display:flex;gap:11px;align-items:flex-start;opacity:.55">
+          <div style="width:20px;height:20px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;color:#fff;font-size:12px">✓</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);text-decoration:line-through">Reply to Sanctuary referral</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Jillian · done</div></div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>7 · Tasks</b><span>Quick-add + owner/status filters. Swipe a row to complete.</span></div>
+</div>
+
+<!-- ============================================================= 8. MENUS (empty) -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><span style="color:var(--brass);font-size:12.5px;font-weight:600">+ New</span></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Menus <span style="color:var(--muted);font-size:18px">0</span></div></div>
+    <div style="padding:0 18px"><div class="field" style="padding:9px 12px">⌕ Search menus and dishes…</div>
+      <div style="display:flex;gap:7px;margin-top:11px;overflow:hidden"><span class="chip">All occasions ▾</span><span class="chip">All cuisines ▾</span><span class="chip">Active ▾</span></div>
+    </div>
+    <div class="scroll">
+      <div class="empty">
+        <div class="ei">▤</div>
+        <div class="h-disp h2">No menus yet</div>
+        <div style="font-size:12px;color:var(--muted-2);margin-top:6px;line-height:1.5">Add your first menu to start<br>building the library.</div>
+        <button class="btn btn-brass" style="margin-top:18px">Add first menu</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>8 · Menus</b><span>Filterable library (occasion / cuisine / status). Instructional empty state.</span></div>
+</div>
+
+<!-- ============================================================= 9. CONTENT -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><span style="color:var(--brass);font-size:12.5px;font-weight:600">Studio ↗</span></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Content</div><div class="sub">Edit your website content from here.</div></div>
+    <div class="scroll" style="padding-top:6px">
+      <div class="stack12">
+        <div class="navrow"><div class="ic">◎</div><div><div class="tt">Events</div><div class="ds">Upcoming dinners and appearances</div></div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">✦</div><div><div class="tt">Services</div><div class="ds">Private chef, travel chef, supper club</div></div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">◈</div><div><div class="tt">Credentials</div><div class="ds">Timeline of awards and positions</div></div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">→</div><div><div class="tt">Press</div><div class="ds">Press mentions and features</div></div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">⚙</div><div><div class="tt">Site Settings</div><div class="ds">Hero tagline, bio, supper club copy</div></div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>9 · Content</b><span>Sanity section editors as a native list; heavy edits link out to Studio.</span></div>
+</div>
+
+<!-- ============================================================= 10. INTEGRATIONS -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><button class="btn btn-pill">↻ Refresh</button></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Integrations</div><div class="sub">Live stats · refreshed 10:24 AM</div></div>
+    <div class="scroll" style="padding-top:4px">
+      <div class="stack12">
+        <div class="card pad"><div class="row-between"><b style="font-size:13px;color:var(--text)">📊 Google Analytics</b><span style="color:var(--brass);font-size:11px;font-weight:600">GA4 ↗</span></div>
+          <div style="display:flex;gap:16px;margin-top:12px">
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">187</div><div style="font-size:10px;color:var(--muted-2)">PAGE VIEWS</div></div>
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">164</div><div style="font-size:10px;color:var(--muted-2)">SESSIONS</div></div>
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">137</div><div style="font-size:10px;color:var(--muted-2)">USERS</div></div>
+          </div><div style="font-size:10px;color:var(--muted);margin-top:8px">LAST 7 DAYS</div></div>
+        <div class="card pad"><div class="row-between"><b style="font-size:13px;color:var(--text)">▲ Vercel</b><span style="color:var(--brass);font-size:11px;font-weight:600">Dashboard ↗</span></div>
+          <div style="margin-top:9px;display:flex;align-items:center;gap:7px"><span class="pilldot" style="color:var(--green)"></span><span style="font-size:11.5px;color:var(--muted-2)">Live · fix: guard comment · 3m ago</span></div></div>
+        <div class="card pad"><div class="row-between"><b style="font-size:13px;color:var(--text)">✉ Outreach</b><span style="color:var(--brass);font-size:11px;font-weight:600">Resend ↗</span></div>
+          <div style="display:flex;gap:16px;margin-top:12px">
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">0</div><div style="font-size:10px;color:var(--muted-2)">THIS MONTH</div></div>
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">0</div><div style="font-size:10px;color:var(--muted-2)">ALL TIME</div></div>
+            <div><div class="num" style="font-family:var(--serif);font-size:22px">0</div><div style="font-size:10px;color:var(--muted-2)">PENDING</div></div>
+          </div></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>10 · Integrations</b><span>2×2 grid → vertical stat cards. Pull-to-refresh live service health.</span></div>
+</div>
+
+<!-- ============================================================= 11. SETTINGS -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><span></span></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Settings</div></div>
+    <div class="scroll" style="padding-top:4px">
+      <div class="eyebrow" style="padding-left:2px">API &amp; budget</div><div class="gap8"></div>
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted-2)">Anthropic key</span><span style="color:var(--green);font-weight:600">✓ Connected</span></div>
+        <div class="gap12"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted-2)"><span>API spend this month</span><span>$0.00 / $25</span></div>
+        <div class="gap6"></div><div class="meter"><i style="width:2%"></i></div>
+      </div>
+      <div class="gap14"></div>
+      <div class="eyebrow" style="padding-left:2px">Sending</div><div class="gap8"></div>
+      <div class="settingrow"><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">Approve before sending</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Recommended</div></div><div class="toggle"></div></div>
+      <div class="gap10"></div>
+      <div class="settingrow"><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">Push notifications</div><div style="font-size:11px;color:var(--muted);margin-top:2px">New drafts · hot replies</div></div><div class="toggle"></div></div>
+      <div class="gap14"></div>
+      <div class="eyebrow" style="padding-left:2px">Connections</div><div class="gap8"></div>
+      <div class="settingrow"><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">Gmail — georginasfoods</div><div style="font-size:11px;color:var(--green);margin-top:2px">✓ Connected · every 10 min</div></div><span style="color:var(--brass);font-size:12px;font-weight:600">Reconnect</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>11 · Settings</b><span>Grouped native form: keys/budget, voice, sending, Gmail/Discord/push.</span></div>
+</div>
+
+<!-- ============================================================= 12. MORE -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="apphead"><div class="eyebrow">Georgina's Assistant</div><div class="h-disp h1">More</div></div>
+    <div class="scroll" style="padding-top:4px">
+      <div class="stack12">
+        <div class="navrow"><div class="ic">☑</div><div class="tt">Tasks</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">→</div><div class="tt">Sequences</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">▤</div><div class="tt">Menus</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">✎</div><div class="tt">Content</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">⊞</div><div class="tt">Integrations</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+        <div class="navrow"><div class="ic">⚙</div><div class="tt">Settings</div><span class="ch"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></div>
+      </div>
+      <div class="gap14"></div>
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted-2)"><span>API this month</span><span>$0.00 / $25 cap</span></div>
+        <div class="gap6"></div><div class="meter"><i style="width:2%"></i></div>
+      </div>
+      <div class="gap12"></div>
+      <div class="navrow"><div class="ic" style="background:#e7d9d5;color:var(--danger)">⏻</div><div class="tt" style="color:var(--danger)">Sign out</div></div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>12 · More</b><span>Hub for Tools + account, with the API-spend meter and sign out.</span></div>
+</div>
+
+<!-- ============================================================= 13. SEQUENCES -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body">
+    <div class="headbar"><span class="backchip"><svg width="20" height="20" viewBox="0 0 24 24"><use href="#i-back"/></svg>More</span><span></span></div>
+    <div class="apphead" style="padding-top:0"><div class="h-disp h1">Sequences</div></div>
+    <div class="scroll">
+      <div class="card pad" style="text-align:center;padding:28px 20px;margin-top:10px">
+        <div class="ei" style="margin:0 auto 14px;background:var(--surface-alt);width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--brass)">→</div>
+        <div class="h-disp h2">Coming in Phase 2</div>
+        <p style="font-size:12px;color:var(--muted-2);margin-top:8px;line-height:1.55">Multi-step follow-up sequences with configurable delays and pre-approved templates. Leads advance automatically — with your approval at each send.</p>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>13 · Sequences</b><span>Mirrors the web placeholder until the backend ships. No dead controls.</span></div>
+</div>
+
+<!-- ============================================================= 14. AUTH -->
+<div class="frame-wrap">
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="sb-r">
+    <svg width="17" height="11" viewBox="0 0 17 11"><g fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></g></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 3.5a10 10 0 0 1 14 0M3.5 6a6.5 6.5 0 0 1 9 0M6 8.5a3 3 0 0 1 4 0"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+  </span></div>
+  <div class="body" style="justify-content:center">
+    <div style="padding:0 30px;text-align:center;margin-top:-40px">
+      <div style="width:60px;height:60px;border-radius:18px;background:var(--brass);margin:0 auto 22px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--serif);font-size:30px">G</div>
+      <div class="eyebrow">Lead Studio</div>
+      <div class="h-disp h1" style="margin-top:4px">Georgina's <em style="font-style:italic;color:var(--brass)">Assistant</em></div>
+      <div class="gap18"></div>
+      <div class="field" style="text-align:left">georginasfoods@gmail.com</div>
+      <div class="gap10"></div>
+      <div class="field" style="text-align:left;color:var(--muted)">••••••••••••</div>
+      <div class="gap14"></div>
+      <button class="btn btn-brass" style="width:100%;padding:14px">Sign in</button>
+      <div class="gap12"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted-2);font-size:12.5px">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Unlock with Face ID
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="caption"><b>14 · Sign in</b><span>Same Supabase accounts as web; biometric unlock on relaunch.</span></div>
+</div>
+
+</div><!-- /grid -->
+
+<div style="max-width:1200px;margin:56px auto 0;text-align:center;color:#7d6f5e;font-size:12px;line-height:1.7">
+Mockups reproduce the live <code style="color:#a98a5c">chefnanawilmot.com/admin</code> brand · colors and type are placeholders to confirm against the web app's theme config · companion to <b style="color:#b7a794">lead-studio-mobile-prd.md</b>
+</div>
+
+</body>
+</html>
