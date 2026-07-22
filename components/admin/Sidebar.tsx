@@ -5,16 +5,15 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCurrentProfile } from '@/hooks/useCurrentProfile'
 import { createClient } from '@/lib/supabase/client'
-
-interface Counts { drafts: number; leads: number; tasks: number }
+import { useDraftsList } from '@/hooks/admin/useDrafts'
 
 const navItems = [
-  { label: 'Today', href: '/admin/today', icon: '◎', countKey: 'tasks' as keyof Counts },
-  { label: 'Pipeline', href: '/admin/pipeline', icon: '⟳', countKey: 'leads' as keyof Counts },
-  { label: 'Drafts', href: '/admin/drafts', icon: '✦', countKey: 'drafts' as keyof Counts },
-  { label: 'Leads', href: '/admin/leads', icon: '◈', countKey: null },
-  { label: 'Tasks', href: '/admin/tasks', icon: '☑', countKey: null },
-  { label: 'Sequences', href: '/admin/sequences', icon: '→', countKey: null },
+  { label: 'Today', href: '/admin/today', icon: '◎', showDraftBadge: false },
+  { label: 'Pipeline', href: '/admin/pipeline', icon: '⟳', showDraftBadge: false },
+  { label: 'Drafts', href: '/admin/drafts', icon: '✦', showDraftBadge: true },
+  { label: 'Leads', href: '/admin/leads', icon: '◈', showDraftBadge: false },
+  { label: 'Tasks', href: '/admin/tasks', icon: '☑', showDraftBadge: false },
+  { label: 'Sequences', href: '/admin/sequences', icon: '→', showDraftBadge: false },
 ]
 
 const toolItems = [
@@ -27,7 +26,7 @@ const toolItems = [
 
 export default function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
-  const [counts, setCounts] = useState<Counts>({ drafts: 0, leads: 0, tasks: 0 })
+  const draftCount = useDraftsList().data?.length ?? 0
   const [spend, setSpend] = useState<{ current: number; cap: number }>({ current: 0, cap: 25 })
   const { profile } = useCurrentProfile()
 
@@ -42,11 +41,6 @@ export default function AdminSidebar({ className }: { className?: string }) {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) setSpend({ current: d.current_month_spend ?? 0, cap: d.monthly_budget_cap ?? 25 }) })
       .catch(() => {})
-
-    fetch('/api/admin/drafts')
-      .then(r => r.ok ? r.json() : [])
-      .then((d: unknown[]) => setCounts(c => ({ ...c, drafts: d.length })))
-      .catch(() => {})
   }, [pathname])
 
   const spendPct = Math.min(100, (spend.current / spend.cap) * 100)
@@ -56,10 +50,8 @@ export default function AdminSidebar({ className }: { className?: string }) {
       width: 244,
       background: '#fff',
       borderRight: '1px solid #eee5d7',
-      display: 'flex',
       flexDirection: 'column',
       padding: '0',
-      flexShrink: 0,
     }}>
       {/* Brand */}
       <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #eee5d7' }}>
@@ -78,7 +70,7 @@ export default function AdminSidebar({ className }: { className?: string }) {
         </div>
         {navItems.map(item => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/')
-          const badge = item.countKey ? counts[item.countKey] : 0
+          const badge = item.showDraftBadge ? draftCount : 0
           return (
             <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
               <div style={{

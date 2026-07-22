@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useDraftsList } from '@/hooks/admin/useDrafts'
 
 const TABS = [
   { label: 'Today', href: '/admin/today', icon: '◎' },
@@ -22,14 +23,7 @@ const MORE_LINKS = [
 export default function MobileBottomNav({ className }: { className?: string }) {
   const pathname = usePathname()
   const [showMore, setShowMore] = useState(false)
-  const [draftCount, setDraftCount] = useState(0)
-
-  useEffect(() => {
-    fetch('/api/admin/drafts')
-      .then(r => r.ok ? r.json() : [])
-      .then((d: unknown[]) => setDraftCount(d.length))
-      .catch(() => {})
-  }, [pathname])
+  const draftCount = useDraftsList().data?.length ?? 0
 
   return (
     <>
