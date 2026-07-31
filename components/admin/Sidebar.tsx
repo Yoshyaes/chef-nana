@@ -18,6 +18,7 @@ const navItems = [
 
 const toolItems = [
   { label: 'Content', href: '/admin/content', icon: '✐', external: false },
+  { label: 'Ticketing', href: '/admin/ticketing', icon: '🎟', external: false },
   { label: 'Menus', href: '/admin/menus', icon: '◫', external: false },
   { label: 'Integrations', href: '/admin/integrations', icon: '⊞', external: false },
   { label: 'Settings', href: '/admin/settings', icon: '⚙', external: false },
