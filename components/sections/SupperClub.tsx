@@ -50,13 +50,18 @@ const images = [
 const defaultDescription = `An intimate supper club series celebrating the foodways of West Africa and beyond reimagined through a fine-dining lens and served around a communal table. Each dinner is a four to five course journey through history, memory, and flavor.`
 
 interface SupperClubProps {
-  events?: { date: string; location?: string; title: string; price?: string }[] | null
+  events?: { date: string; location?: string; title: string; price?: string; ticketUrl?: string; detail?: string }[] | null
   siteSettings?: { supperClubDescription?: string } | null
 }
 
 export default function SupperClub({ events: cmsEvents, siteSettings }: SupperClubProps) {
   const events = cmsEvents?.length ? cmsEvents : defaultEvents
   const description = siteSettings?.supperClubDescription || defaultDescription
+  // Rows carry their own "Get Tickets" link now (external or native). The
+  // hero CTA below points at the soonest listed event's link so it isn't
+  // stuck hardcoded to one destination; falls back to Tock if none is set.
+  const heroTicketUrl =
+    (events as { ticketUrl?: string }[]).find(e => e.ticketUrl)?.ticketUrl ?? 'https://exploretock.com/georginas'
   return (
     <section
       id="supper"
@@ -114,7 +119,7 @@ export default function SupperClub({ events: cmsEvents, siteSettings }: SupperCl
 
         <FadeIn delay={0.3}>
           <div className="flex flex-wrap gap-4">
-            <Button variant="green" href="https://exploretock.com/georginas">
+            <Button variant="green" href={heroTicketUrl}>
               Get Tickets
             </Button>
             <Button

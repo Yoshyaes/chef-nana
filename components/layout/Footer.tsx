@@ -1,6 +1,13 @@
 import Link from 'next/link'
+import { getEvents } from '@/lib/queries'
 
-export default function Footer() {
+export default async function Footer() {
+  // Same "soonest listed event's own link" fallback as the hero CTA in
+  // SupperClub — falls back to Tock if no event currently has a ticketUrl.
+  const events = await getEvents().catch(() => null)
+  const ticketUrl = events?.find(e => e.ticketUrl)?.ticketUrl ?? 'https://exploretock.com/georginas'
+  const ticketUrlIsExternal = /^https?:\/\//.test(ticketUrl)
+
   return (
     <footer
       className="bg-brown relative"
@@ -121,14 +128,23 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <a
-                href="https://exploretock.com/georginas"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[13px] text-cream/45 no-underline font-light transition-colors duration-200 hover:text-gold-light"
-              >
-                Tock Reservations
-              </a>
+              {ticketUrlIsExternal ? (
+                <a
+                  href={ticketUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[13px] text-cream/45 no-underline font-light transition-colors duration-200 hover:text-gold-light"
+                >
+                  Get Tickets
+                </a>
+              ) : (
+                <Link
+                  href={ticketUrl}
+                  className="text-[13px] text-cream/45 no-underline font-light transition-colors duration-200 hover:text-gold-light"
+                >
+                  Get Tickets
+                </Link>
+              )}
             </li>
             <li>
               <a

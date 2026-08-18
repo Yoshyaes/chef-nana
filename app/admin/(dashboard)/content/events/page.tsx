@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-interface Event { _id: string; title: string; date: string; location: string; price: string; order: number }
+interface Event { _id: string; title: string; date: string; location: string; price: string; ticketUrl: string; detail: string; order: number }
 type Draft = Omit<Event, '_id'>
 
-const EMPTY: Draft = { title: '', date: '', location: '', price: '', order: 0 }
+const EMPTY: Draft = { title: '', date: '', location: '', price: '', ticketUrl: '', detail: '', order: 0 }
 
 export default function EventsPage() {
   const [docs, setDocs] = useState<Event[]>([])
@@ -19,7 +19,11 @@ export default function EventsPage() {
     fetch('/api/admin/content/event').then(r => r.json()).then(setDocs)
   }, [])
 
-  function startEdit(doc: Event) { setEditing(doc); setDraft({ title: doc.title, date: doc.date, location: doc.location, price: doc.price, order: doc.order }); setCreating(false) }
+  function startEdit(doc: Event) {
+    setEditing(doc)
+    setDraft({ title: doc.title, date: doc.date, location: doc.location, price: doc.price, ticketUrl: doc.ticketUrl ?? '', detail: doc.detail ?? '', order: doc.order })
+    setCreating(false)
+  }
   function startCreate() { setCreating(true); setEditing(null); setDraft(EMPTY) }
 
   async function handleSave(e: React.FormEvent) {
@@ -62,8 +66,8 @@ export default function EventsPage() {
         <form onSubmit={handleSave} style={{ background: '#fff', border: '1px solid #eee5d7', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 500, color: 'var(--brown)', marginBottom: 16 }}>{creating ? 'New event' : 'Edit event'}</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-            {([['title', 'Title *', true], ['date', 'Date (e.g. Apr 11 + 12)'], ['location', 'Location'], ['price', 'Price (e.g. $180)'], ['order', 'Display order']] as [keyof Draft, string, boolean?][]).map(([key, label, req]) => (
-              <div key={key} style={{ gridColumn: key === 'title' ? 'span 2' : undefined }}>
+            {([['title', 'Title *', true], ['date', 'Date (e.g. Apr 11 + 12)'], ['location', 'Location'], ['price', 'Price (e.g. $180)'], ['ticketUrl', 'Get Tickets link (external URL or /events/slug)'], ['order', 'Display order']] as [keyof Draft, string, boolean?][]).map(([key, label, req]) => (
+              <div key={key} style={{ gridColumn: key === 'title' || key === 'ticketUrl' ? 'span 2' : undefined }}>
                 <label style={{ fontSize: 11, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>{label}</label>
                 <input
                   required={!!req}
@@ -73,6 +77,15 @@ export default function EventsPage() {
                 />
               </div>
             ))}
+            <div style={{ gridColumn: 'span 2' }}>
+              <label style={{ fontSize: 11, color: '#9a7d5a', display: 'block', marginBottom: 4 }}>Expanded detail (address/time shown when a guest expands the row)</label>
+              <textarea
+                value={draft.detail}
+                onChange={e => setDraft(p => ({ ...p, detail: e.target.value }))}
+                rows={2}
+                style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5d9c9', borderRadius: 6, fontSize: 13 }}
+              />
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="submit" disabled={saving} style={{ padding: '8px 16px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>

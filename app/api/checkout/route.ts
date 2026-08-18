@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const session = await getStripe().checkout.sessions.create({
-    ui_mode: 'embedded',
+    ui_mode: 'embedded_page',
     mode: 'payment',
     line_items: [
       {

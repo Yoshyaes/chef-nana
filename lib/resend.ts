@@ -14,7 +14,7 @@ export function getResend() {
 async function getSendingDomain() {
   const supabase = await createServiceClient()
   const { data: settings } = await supabase.from('settings').select('sending_domain').single()
-  return settings?.sending_domain ?? 'mail.chefnanawilmot.com'
+  return settings?.sending_domain ?? 'chefnanawilmot.com'
 }
 
 interface TicketEmailParams {
@@ -27,13 +27,23 @@ interface TicketEmailParams {
 }
 
 export async function sendTicketEmail({ to, name, eventTitle, eventDate, location, qrToken }: TicketEmailParams) {
-  const qrDataUrl = await QRCode.toDataURL(qrToken, { width: 320, margin: 1 })
+  // A real inline attachment (cid: reference) rather than a base64 data URI
+  // in <img src> — Gmail and other major clients strip data URIs from HTML
+  // emails, so the QR silently failed to render when sent that way.
+  const qrPng = await QRCode.toBuffer(qrToken, { width: 320, margin: 1 })
   const sendingDomain = await getSendingDomain()
 
   await getResend().emails.send({
     from: `Chef Nana <tickets@${sendingDomain}>`,
     to,
     subject: `Your ticket — ${eventTitle}`,
+    attachments: [
+      {
+        filename: 'ticket-qr.png',
+        content: qrPng,
+        contentId: 'ticket-qr',
+      },
+    ],
     html: `
       <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #2C1A0E;">
         <h1 style="font-weight: 400; font-size: 26px;">You're in, ${name}.</h1>
@@ -42,7 +52,7 @@ export async function sendTicketEmail({ to, name, eventTitle, eventDate, locatio
           ${eventDate}${location ? ` · ${location}` : ''}
         </p>
         <p style="font-size: 14px; color: #5C3A22;">Show this QR code at the door.</p>
-        <img src="${qrDataUrl}" alt="Ticket QR code" width="240" height="240" />
+        <img src="cid:ticket-qr" alt="Ticket QR code" width="240" height="240" />
       </div>
     `,
   })

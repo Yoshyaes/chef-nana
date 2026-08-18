@@ -28,7 +28,20 @@ export default defineType({
       name: 'price',
       title: 'Price',
       type: 'string',
-      description: 'e.g. "$180" — leave blank if not applicable',
+      description: 'e.g. "$180" or "$185+" — leave blank if not applicable',
+    }),
+    defineField({
+      name: 'ticketUrl',
+      title: 'Get Tickets Link',
+      type: 'string',
+      description:
+        'Where "Get Tickets" sends guests. Either a full external URL (a partner venue\'s own ticketing page) or an internal path to a native event page (e.g. "/events/bem-books-sep-9"). Leave blank to hide the ticket link for this row.',
+    }),
+    defineField({
+      name: 'detail',
+      title: 'Expanded Detail',
+      type: 'text',
+      description: 'Address/time detail shown when a guest expands this row, e.g. "Sunday 6:30–9:30PM, Maxwell Tribeca, 135 Watts St"',
     }),
     defineField({
       name: 'order',

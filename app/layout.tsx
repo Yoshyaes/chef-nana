@@ -61,7 +61,6 @@ const personJsonLd = {
   sameAs: [
     'https://www.instagram.com/georginasfoods',
     'https://www.instagram.com/illnahna',
-    'https://exploretock.com/georginas',
   ],
 }
 
