@@ -1,11 +1,19 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 export default function Nav() {
+  const pathname = usePathname()
+  // Transparent-until-scrolled only works where the page starts with a dark
+  // hero image behind it (the homepage). Every other page here starts with
+  // a light background, so the light nav text needs the solid dark bar from
+  // the first frame or it's unreadable — this was invisible on /events/[slug].
+  const isHome = pathname === '/'
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const solid = scrolled || !isHome
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60)
@@ -33,12 +41,12 @@ export default function Nav() {
         className="fixed top-0 left-0 right-0 flex items-center justify-between transition-[background,padding,backdrop-filter] duration-400"
         style={{
           zIndex: 100,
-          paddingTop: scrolled ? '14px' : '22px',
-          paddingBottom: scrolled ? '14px' : '22px',
+          paddingTop: solid ? '14px' : '22px',
+          paddingBottom: solid ? '14px' : '22px',
           paddingLeft: 'max(24px, min(60px, 4vw))',
           paddingRight: 'max(24px, min(60px, 4vw))',
-          background: scrolled ? 'rgba(28, 12, 4, 0.96)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          background: solid ? 'rgba(28, 12, 4, 0.96)' : 'transparent',
+          backdropFilter: solid ? 'blur(12px)' : 'none',
         }}
       >
         {/* Logo */}
