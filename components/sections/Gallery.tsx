@@ -71,7 +71,7 @@ export default function Gallery({ galleryImages }: GalleryProps) {
             </h2>
           </div>
           <a
-            href="#"
+            href="/gallery"
             className="text-[11px] tracking-[0.2em] uppercase text-terracotta font-medium flex items-center gap-2 no-underline pb-5 hover:opacity-70 transition-opacity"
           >
             View Full Gallery →

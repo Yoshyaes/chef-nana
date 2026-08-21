@@ -44,6 +44,18 @@ export default defineType({
       type: 'number',
       description: 'Lower numbers appear first',
     }),
+    defineField({
+      name: 'eventName',
+      title: 'Event Name',
+      type: 'string',
+      description: 'Groups this image on the full gallery page, e.g. "Fitler Club, Philly". Leave blank to leave it ungrouped.',
+    }),
+    defineField({
+      name: 'eventDate',
+      title: 'Event Date',
+      type: 'date',
+      description: 'Shown next to the event name when grouped',
+    }),
   ],
   orderings: [
     { title: 'Display Order', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] },

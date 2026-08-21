@@ -3,24 +3,42 @@
 import { useCallback, useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
-import Button from '@/components/ui/Button'
+import { MAX_TICKETS_PER_ORDER } from '@/lib/ticketing'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
-interface CheckoutProps {
-  eventId: string
+function formatPrice(cents: number, currency: string) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100)
 }
 
-export default function Checkout({ eventId }: CheckoutProps) {
-  const [started, setStarted] = useState(false)
+interface CheckoutProps {
+  eventId: string
+  priceCents: number
+  currency: string
+}
+
+export default function Checkout({ eventId, priceCents, currency }: CheckoutProps) {
+  const [quantity, setQuantity] = useState(1)
+  // Undefined until the guest actually engages with the form — mounting
+  // EmbeddedCheckoutProvider is what creates a Stripe session, and creating
+  // one on every page view (including bounces) piles up abandoned sessions.
+  const [engaged, setEngaged] = useState(false)
   const [soldOut, setSoldOut] = useState(false)
   const [error, setError] = useState(false)
 
+  // Re-created whenever quantity changes; combined with key={quantity} on
+  // the provider below, changing the selector remounts the provider and
+  // re-invokes this with the new quantity, requesting a freshly sized
+  // session rather than relying on Stripe's adjustable_quantity.
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ eventId }),
+      body: JSON.stringify({ eventId, quantity }),
     })
 
     if (res.status === 409) {
@@ -34,7 +52,7 @@ export default function Checkout({ eventId }: CheckoutProps) {
 
     const { clientSecret } = await res.json()
     return clientSecret as string
-  }, [eventId])
+  }, [eventId, quantity])
 
   if (soldOut) {
     return (
@@ -48,19 +66,42 @@ export default function Checkout({ eventId }: CheckoutProps) {
     return <p className="text-[14px] text-brown-mid">Something went wrong. Please refresh and try again.</p>
   }
 
-  if (!started) {
-    return (
-      <Button variant="green" onClick={() => setStarted(true)}>
-        Get tickets
-      </Button>
-    )
-  }
-
   return (
-    <div id="checkout" style={{ maxWidth: '480px' }}>
-      <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
+    <div style={{ maxWidth: '480px' }}>
+      <div className="flex items-end gap-4 mb-5">
+        <div>
+          <label htmlFor="ticket-quantity" className="block text-[11px] tracking-[0.18em] uppercase text-brown-mid mb-2">
+            Seats
+          </label>
+          <select
+            id="ticket-quantity"
+            value={quantity}
+            onFocus={() => setEngaged(true)}
+            onChange={(e) => {
+              setEngaged(true)
+              setQuantity(Number(e.target.value))
+            }}
+            className="border border-brown-mid/30 bg-cream text-[15px] text-brown px-4 py-2.5 outline-none"
+          >
+            {Array.from({ length: MAX_TICKETS_PER_ORDER }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="text-[15px] text-brown-mid pb-2.5">
+          Total <span className="text-brown">{formatPrice(priceCents * quantity, currency)}</span>
+        </p>
+      </div>
+
+      <div id="checkout" onMouseEnter={() => setEngaged(true)} onTouchStart={() => setEngaged(true)}>
+        {engaged && (
+          <EmbeddedCheckoutProvider key={quantity} stripe={stripePromise} options={{ fetchClientSecret }}>
+            <EmbeddedCheckout />
+          </EmbeddedCheckoutProvider>
+        )}
+      </div>
     </div>
   )
 }

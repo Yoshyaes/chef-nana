@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/server'
 import Checkout from '@/components/Checkout'
-import SeatsLeft from '@/components/SeatsLeft'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -83,12 +82,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           </p>
         )}
 
-        <div className="mb-6">
-          <SeatsLeft capacity={event.capacity} seatsSold={seatsSold} />
-        </div>
-
         {canBuy ? (
-          <Checkout eventId={event.id} />
+          <Checkout eventId={event.id} priceCents={event.price_cents} currency={event.currency} />
         ) : (
           <div className="inline-block bg-brown-mid text-cream text-[13px] tracking-[0.18em] uppercase px-6 py-3.5">
             Sold out

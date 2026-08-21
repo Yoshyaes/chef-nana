@@ -21,6 +21,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const nameField = session.custom_fields?.find(f => f.key === 'attendee_name')
   const name = nameField?.text?.value || email
+  const qty = Number(session.metadata?.quantity) || 1
 
   const supabase = await createServiceClient()
 
@@ -36,7 +37,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     p_session: session.id,
     p_name: name,
     p_email: email,
-    p_qty: 1,
+    p_qty: qty,
     p_qr: qrToken,
   })
 
@@ -84,6 +85,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }),
     location: event.location,
     qrToken,
+    quantity: qty,
   })
   await upsertTicketingContact({ email, name })
 }

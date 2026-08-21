@@ -24,9 +24,10 @@ interface TicketEmailParams {
   eventDate: string
   location: string | null
   qrToken: string
+  quantity: number
 }
 
-export async function sendTicketEmail({ to, name, eventTitle, eventDate, location, qrToken }: TicketEmailParams) {
+export async function sendTicketEmail({ to, name, eventTitle, eventDate, location, qrToken, quantity }: TicketEmailParams) {
   // A real inline attachment (cid: reference) rather than a base64 data URI
   // in <img src> — Gmail and other major clients strip data URIs from HTML
   // emails, so the QR silently failed to render when sent that way.
@@ -51,6 +52,7 @@ export async function sendTicketEmail({ to, name, eventTitle, eventDate, locatio
           ${eventTitle}<br />
           ${eventDate}${location ? ` · ${location}` : ''}
         </p>
+        ${quantity > 1 ? `<p style="font-size: 14px; color: #5C3A22;">Party of ${quantity}</p>` : ''}
         <p style="font-size: 14px; color: #5C3A22;">Show this QR code at the door.</p>
         <img src="cid:ticket-qr" alt="Ticket QR code" width="240" height="240" />
       </div>

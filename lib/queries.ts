@@ -26,9 +26,9 @@ export async function getCredentials() {
 export async function getGalleryImages() {
   if (!client) return null
   return client.fetch<
-    { image: unknown; alt: string; caption: string; position: string }[]
+    { image: unknown; alt: string; caption: string; position: string; eventName?: string; eventDate?: string }[]
   >(
-    `*[_type == "galleryImage"] | order(order asc) { image, alt, caption, position }`
+    `*[_type == "galleryImage"] | order(order asc) { image, alt, caption, position, eventName, eventDate }`
   )
 }
 
