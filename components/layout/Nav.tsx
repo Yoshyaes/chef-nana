@@ -27,12 +27,16 @@ export default function Nav() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  // Root-relative (leading "/") so these always resolve to the homepage's
+  // anchors — a bare "#about" href resolves relative to whatever page is
+  // currently open, so from /gallery or /events/[slug] it silently rewrote
+  // the URL without navigating anywhere.
   const navLinks = [
-    { href: '#about', label: 'Story' },
-    { href: '#services', label: 'Services' },
-    { href: '#supper', label: 'Supper Club' },
-    { href: '#gallery', label: 'Gallery' },
-    { href: '#press', label: 'Press' },
+    { href: '/#about', label: 'Story' },
+    { href: '/#services', label: 'Services' },
+    { href: '/#supper', label: 'Supper Club' },
+    { href: '/#gallery', label: 'Gallery' },
+    { href: '/#press', label: 'Press' },
   ]
 
   return (
@@ -71,7 +75,7 @@ export default function Nav() {
           ))}
           <li>
             <Link
-              href="#booking"
+              href="/#booking"
               className="bg-gold text-brown text-[12px] font-semibold tracking-[0.18em] uppercase py-2.5 no-underline transition-colors duration-200 hover:bg-gold-light"
             style={{ paddingLeft: '22px', paddingRight: '22px' }}
             >
@@ -116,7 +120,7 @@ export default function Nav() {
             </Link>
           ))}
           <Link
-            href="#booking"
+            href="/#booking"
             className="mt-4 bg-gold text-brown text-[12px] font-semibold tracking-[0.18em] uppercase px-9 py-4 no-underline hover:bg-gold-light transition-colors"
             onClick={() => setMenuOpen(false)}
           >

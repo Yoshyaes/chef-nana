@@ -63,12 +63,12 @@ export default async function Footer() {
           </div>
           <ul className="list-none flex flex-col gap-3">
             {[
-              { href: '#about', label: 'Her Story' },
-              { href: '#services', label: 'Services' },
-              { href: '#supper', label: 'Supper Club' },
-              { href: '#gallery', label: 'Gallery' },
-              { href: '#press', label: 'Press' },
-              { href: '#booking', label: 'Book Nana' },
+              { href: '/#about', label: 'Her Story' },
+              { href: '/#services', label: 'Services' },
+              { href: '/#supper', label: 'Supper Club' },
+              { href: '/#gallery', label: 'Gallery' },
+              { href: '/#press', label: 'Press' },
+              { href: '/#booking', label: 'Book Nana' },
             ].map(({ href, label }) => (
               <li key={href}>
                 <Link
@@ -89,12 +89,12 @@ export default async function Footer() {
           </div>
           <ul className="list-none flex flex-col gap-3">
             {[
-              { href: '#booking', label: 'Private Chef' },
-              { href: '#booking', label: 'Catering' },
-              { href: '#supper', label: 'Love That I Knead' },
-              { href: '#booking', label: 'Travel Chef' },
-              { href: '#booking', label: 'Menu Consulting' },
-              { href: '#newsletter', label: 'Shop (Soon)' },
+              { href: '/#booking', label: 'Private Chef' },
+              { href: '/#booking', label: 'Catering' },
+              { href: '/#supper', label: 'Love That I Knead' },
+              { href: '/#booking', label: 'Travel Chef' },
+              { href: '/#booking', label: 'Menu Consulting' },
+              { href: '/#newsletter', label: 'Shop (Soon)' },
             ].map(({ href, label }) => (
               <li key={label}>
                 <Link
@@ -123,7 +123,7 @@ export default async function Footer() {
               </a>
             </li>
             <li>
-              <Link href="#booking" className="text-[13px] text-cream/45 no-underline font-light transition-colors duration-200 hover:text-gold-light">
+              <Link href="/#booking" className="text-[13px] text-cream/45 no-underline font-light transition-colors duration-200 hover:text-gold-light">
                 Press Inquiries
               </Link>
             </li>
