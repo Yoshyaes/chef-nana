@@ -63,6 +63,8 @@ export const checkGmailInbox = inngest.createFunction(
           subject: message.subject,
           body: message.body,
           gmailMessageId: message.id,
+          gmailThreadId: message.threadId,
+          rfcMessageId: message.rfcMessageId,
         },
       })
 

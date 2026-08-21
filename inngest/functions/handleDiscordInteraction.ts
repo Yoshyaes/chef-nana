@@ -57,7 +57,7 @@ export const handleDiscordInteraction = inngest.createFunction(
         interactionToken,
         `✅ Sent to **${result.leadName}**`
       )
-      return { sent: true, resendId: result.resendId }
+      return { sent: true, messageId: result.messageId, provider: result.provider }
     }
 
     if (customId.startsWith('reject_draft_')) {

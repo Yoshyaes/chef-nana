@@ -9,8 +9,8 @@ const MODEL = 'claude-sonnet-4-6'
 
 export const handleInboundEmail = inngest.createFunction(
   { id: 'handle-inbound-email', triggers: [{ event: 'email/inbound.received' }] },
-  async ({ event }: { event: { data: { leadId: string; from: string; subject: string; body: string; gmailMessageId: string } } }) => {
-    const { leadId, subject, body } = event.data
+  async ({ event }: { event: { data: { leadId: string; from: string; subject: string; body: string; gmailMessageId: string; gmailThreadId?: string; rfcMessageId?: string } } }) => {
+    const { leadId, subject, body, gmailMessageId, gmailThreadId, rfcMessageId } = event.data
     const supabase = await createServiceClient()
 
     // Step 1: Save inbound message
@@ -22,6 +22,9 @@ export const handleInboundEmail = inngest.createFunction(
       subject,
       body,
       sent_at: now,
+      gmail_message_id: gmailMessageId,
+      gmail_thread_id: gmailThreadId,
+      rfc_message_id: rfcMessageId,
     })
 
     // Step 2: Load context

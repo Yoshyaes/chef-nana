@@ -5,6 +5,7 @@ export interface GmailMessage {
   subject: string
   body: string
   inReplyTo?: string
+  rfcMessageId?: string
   date: string
 }
 
@@ -77,6 +78,7 @@ export async function fetchGmailMessage(
     subject: headers['subject'] ?? '(no subject)',
     body: parseEmailBody(data.payload),
     inReplyTo: headers['in-reply-to'],
+    rfcMessageId: headers['message-id'],
     date: headers['date'] ?? new Date().toISOString(),
   }
 }
@@ -115,6 +117,61 @@ export function parseEmailBody(payload: GmailPart): string {
   }
 
   return ''
+}
+
+function encodeMimeHeader(value: string): string {
+  if (/^[\x00-\x7F]*$/.test(value)) return value
+  return `=?UTF-8?B?${Buffer.from(value, 'utf-8').toString('base64')}?=`
+}
+
+interface SendGmailReplyParams {
+  to: string
+  subject: string
+  bodyText: string
+  threadId?: string
+  inReplyToRfcId?: string
+}
+
+export async function sendGmailReply(
+  accessToken: string,
+  { to, subject, bodyText, threadId, inReplyToRfcId }: SendGmailReplyParams
+): Promise<{ id: string; threadId: string }> {
+  const headerLines = [
+    `From: Nana Wilmot <georginasfoods@gmail.com>`,
+    `To: ${to}`,
+    `Subject: ${encodeMimeHeader(subject)}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset="UTF-8"',
+    'Content-Transfer-Encoding: 8bit',
+  ]
+  if (inReplyToRfcId) {
+    headerLines.push(`In-Reply-To: ${inReplyToRfcId}`)
+    headerLines.push(`References: ${inReplyToRfcId}`)
+  }
+
+  const raw = `${headerLines.join('\r\n')}\r\n\r\n${bodyText}`
+  const encoded = Buffer.from(raw, 'utf-8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ raw: encoded, threadId }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(`Gmail send error: ${err.error?.message ?? res.status}`)
+  }
+
+  const data = await res.json()
+  return { id: data.id as string, threadId: data.threadId as string }
 }
 
 export async function getGmailHistoryId(accessToken: string): Promise<string> {

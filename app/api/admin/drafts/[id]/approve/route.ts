@@ -10,5 +10,5 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       : 400
     return NextResponse.json({ error: result.error }, { status })
   }
-  return NextResponse.json({ sent: true, resendId: result.resendId })
+  return NextResponse.json({ sent: true, messageId: result.messageId, provider: result.provider })
 }
