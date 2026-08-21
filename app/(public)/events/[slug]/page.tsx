@@ -46,49 +46,53 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         paddingBottom: 'clamp(64px, 8vw, 100px)',
       }}
     >
-      <div className="mx-auto" style={{ maxWidth: '640px' }}>
-        {event.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={event.image_url}
-            alt={event.title}
-            className="w-full h-auto object-cover mb-8"
-            style={{ maxHeight: '360px' }}
-          />
-        )}
-
-        <h1
-          className="font-cormorant font-light text-brown leading-[1.15] mb-4"
-          style={{ fontSize: 'clamp(36px, 5vw, 54px)' }}
-        >
-          {event.title}
-        </h1>
-
-        <div className="flex flex-wrap items-center gap-3 mb-6 text-[15px] text-brown-mid">
-          <span>{formatDate(event.event_date)}</span>
-          {event.location && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{event.location}</span>
-            </>
+      <div className="mx-auto lg:grid lg:grid-cols-[1fr_440px] lg:gap-x-16 lg:items-start" style={{ maxWidth: '1080px' }}>
+        <div style={{ maxWidth: '640px' }}>
+          {event.image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={event.image_url}
+              alt={event.title}
+              className="w-full h-auto object-cover mb-8"
+              style={{ maxHeight: '360px' }}
+            />
           )}
-          <span aria-hidden="true">·</span>
-          <span>{formatPrice(event.price_cents, event.currency)}</span>
+
+          <h1
+            className="font-cormorant font-light text-brown leading-[1.15] mb-4"
+            style={{ fontSize: 'clamp(36px, 5vw, 54px)' }}
+          >
+            {event.title}
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-3 mb-6 text-[15px] text-brown-mid">
+            <span>{formatDate(event.event_date)}</span>
+            {event.location && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{event.location}</span>
+              </>
+            )}
+            <span aria-hidden="true">·</span>
+            <span>{formatPrice(event.price_cents, event.currency)}</span>
+          </div>
+
+          {event.description && (
+            <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-8 lg:mb-0" style={{ maxWidth: '520px' }}>
+              {event.description}
+            </p>
+          )}
         </div>
 
-        {event.description && (
-          <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-8" style={{ maxWidth: '520px' }}>
-            {event.description}
-          </p>
-        )}
-
-        {canBuy ? (
-          <Checkout eventId={event.id} priceCents={event.price_cents} currency={event.currency} />
-        ) : (
-          <div className="inline-block bg-brown-mid text-cream text-[13px] tracking-[0.18em] uppercase px-6 py-3.5">
-            Sold out
-          </div>
-        )}
+        <div className="mt-8 lg:mt-0 lg:sticky" style={{ top: '110px' }}>
+          {canBuy ? (
+            <Checkout eventId={event.id} priceCents={event.price_cents} currency={event.currency} />
+          ) : (
+            <div className="inline-block bg-brown-mid text-cream text-[13px] tracking-[0.18em] uppercase px-6 py-3.5">
+              Sold out
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )
