@@ -1,6 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Vercel kills the whole edge function at 25s with no response, which turns any
+// hung Supabase call into a hard 504 for every admin request. Race against a
+// shorter timeout instead so a Supabase blip degrades to a login redirect.
+const AUTH_CHECK_TIMEOUT_MS = 8000
+
+function withTimeout<T>(promiseLike: PromiseLike<T>, ms: number): Promise<T> {
+  const promise = Promise.resolve(promiseLike)
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      const timer = setTimeout(() => reject(new Error('Auth check timed out')), ms)
+      promise.finally(() => clearTimeout(timer))
+    }),
+  ])
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
@@ -49,7 +65,14 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const result = await withTimeout(supabase.auth.getUser(), AUTH_CHECK_TIMEOUT_MS)
+    user = result.data.user
+  } catch {
+    // Timed out or errored talking to Supabase — treat as unauthenticated rather
+    // than hanging until Vercel force-kills the function at 25s.
+  }
 
   if (!user) {
     const loginUrl = new URL('/admin/login', request.url)
@@ -72,17 +95,24 @@ export async function middleware(request: NextRequest) {
       cookies: { getAll: () => [], setAll: () => {} },
     })
 
-    const { data: profile } = await serviceClient
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    hasProfile = !!profile
+    try {
+      const { data: profile } = await withTimeout(
+        serviceClient.from('profiles').select('id').eq('id', user.id).maybeSingle(),
+        AUTH_CHECK_TIMEOUT_MS
+      )
+      hasProfile = !!profile
+    } catch {
+      // Timed out or errored — falls through to fail-closed below, same as a
+      // missing profile row.
+    }
   }
 
   if (!hasProfile) {
-    await supabase.auth.signOut()
+    try {
+      await withTimeout(supabase.auth.signOut(), AUTH_CHECK_TIMEOUT_MS)
+    } catch {
+      // Best-effort — the redirect below still ends the request either way.
+    }
 
     const loginUrl = new URL('/admin/login', request.url)
     loginUrl.searchParams.set('error', 'unauthorized')
