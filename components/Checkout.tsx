@@ -1,10 +1,12 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
 import { MAX_TICKETS_PER_ORDER } from '@/lib/ticketing'
 
+// Module scope on purpose: starts fetching Stripe.js as soon as this chunk
+// evaluates, rather than waiting for the component to mount.
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 function formatPrice(cents: number, currency: string) {
@@ -25,6 +27,37 @@ export default function Checkout({ eventId, priceCents, currency }: CheckoutProp
   const [quantity, setQuantity] = useState(1)
   const [soldOut, setSoldOut] = useState(false)
   const [error, setError] = useState(false)
+
+  // Stripe renders its form into an iframe that stays empty for a beat after
+  // hydration — Stripe.js downloads, the session round trips, then the iframe
+  // paints. With nothing in that space the panel reads as broken, so a
+  // skeleton holds the shape until the real form has measurable height.
+  const [ready, setReady] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    // Both observers report asynchronously, so readiness is only ever set
+    // from a callback — never synchronously in the effect body. ResizeObserver
+    // fires once on observe(), which covers an iframe that is already present
+    // and sized (a remount after the browser has everything cached).
+    const check = () => {
+      const frame = el.querySelector('iframe')
+      if (frame && frame.getBoundingClientRect().height > 80) setReady(true)
+    }
+
+    const mo = new MutationObserver(check)
+    mo.observe(el, { childList: true, subtree: true })
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+
+    return () => {
+      mo.disconnect()
+      ro.disconnect()
+    }
+  }, [quantity])
 
   // Re-created whenever quantity changes; combined with key={quantity} on
   // the provider below, changing the selector remounts the provider and
@@ -72,7 +105,10 @@ export default function Checkout({ eventId, priceCents, currency }: CheckoutProp
           <select
             id="ticket-quantity"
             value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
+            onChange={(e) => {
+              setReady(false)
+              setQuantity(Number(e.target.value))
+            }}
             className="border border-brown-mid/30 bg-cream text-[15px] text-brown px-4 py-2.5 outline-none"
           >
             {Array.from({ length: MAX_TICKETS_PER_ORDER }, (_, i) => i + 1).map((n) => (
@@ -92,11 +128,35 @@ export default function Checkout({ eventId, priceCents, currency }: CheckoutProp
           a Checkout Session per page view; sessions hold no inventory (seats are
           only counted in fulfill_checkout, after payment) and Stripe expires
           unused ones, so abandoned views are harmless. */}
-      <div id="checkout">
-        <EmbeddedCheckoutProvider key={quantity} stripe={stripePromise} options={{ fetchClientSecret }}>
-          <EmbeddedCheckout />
-        </EmbeddedCheckoutProvider>
+      <div ref={containerRef} className="relative">
+        {!ready && (
+          <div className="absolute inset-0" aria-hidden="true">
+            <CheckoutSkeleton />
+          </div>
+        )}
+        <div className={ready ? undefined : 'opacity-0'}>
+          <EmbeddedCheckoutProvider key={quantity} stripe={stripePromise} options={{ fetchClientSecret }}>
+            <EmbeddedCheckout />
+          </EmbeddedCheckoutProvider>
+        </div>
       </div>
+    </div>
+  )
+}
+
+// Mirrors the real form's shape — email, name, then payment methods — so the
+// swap to the live iframe is not a jolt.
+function CheckoutSkeleton() {
+  return (
+    <div className="animate-pulse" role="status" aria-label="Loading payment form">
+      <div className="h-2.5 w-14 bg-brown-mid/15 mb-2.5" />
+      <div className="h-11 w-full bg-brown-mid/10 mb-6" />
+      <div className="h-2.5 w-40 bg-brown-mid/15 mb-2.5" />
+      <div className="h-11 w-full bg-brown-mid/10 mb-6" />
+      <div className="h-2.5 w-28 bg-brown-mid/15 mb-2.5" />
+      <div className="h-14 w-full bg-brown-mid/10 mb-2" />
+      <div className="h-14 w-full bg-brown-mid/10 mb-2" />
+      <div className="h-14 w-full bg-brown-mid/10" />
     </div>
   )
 }
