@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/server'
 import Checkout from '@/components/Checkout'
+import RichText from '@/components/RichText'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -78,9 +79,11 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           </div>
 
           {event.description && (
-            <p className="text-[18px] leading-[1.85] text-brown-mid font-light mb-8 lg:mb-0" style={{ maxWidth: '520px' }}>
-              {event.description}
-            </p>
+            <RichText
+              value={event.description}
+              className="text-[18px] leading-[1.85] text-brown-mid font-light mb-8 lg:mb-0"
+              style={{ maxWidth: '520px' }}
+            />
           )}
         </div>
 

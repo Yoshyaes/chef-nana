@@ -121,9 +121,10 @@ export default function TicketingPage() {
               <textarea
                 value={draft.description}
                 onChange={e => setDraft(p => ({ ...p, description: e.target.value }))}
-                rows={3}
+                rows={10}
                 style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5d9c9', borderRadius: 6, fontSize: 13 }}
               />
+              <p style={{ fontSize: 10, color: '#9a7d5a', marginTop: 4, lineHeight: 1.5 }}>Blank line = new paragraph · single line break = new line · <code>**Bites**</code> on its own line = course subheader</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>

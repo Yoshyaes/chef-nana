@@ -129,9 +129,10 @@ export default function TicketingEventPage({ params }: { params: Promise<{ id: s
             <textarea
               value={event.description ?? ''}
               onChange={e => setEvent({ ...event, description: e.target.value })}
-              rows={3}
+              rows={10}
               style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5d9c9', borderRadius: 6, fontSize: 13 }}
             />
+            <p style={{ fontSize: 10, color: '#9a7d5a', marginTop: 4, lineHeight: 1.5 }}>Blank line = new paragraph · single line break = new line · <code>**Bites**</code> on its own line = course subheader</p>
           </div>
         </div>
         <button type="submit" disabled={saving} style={{ padding: '8px 16px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>
