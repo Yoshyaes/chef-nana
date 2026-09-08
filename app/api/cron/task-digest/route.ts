@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getResend } from '@/lib/resend'
+import { SITE_URL } from '@/lib/site-url'
 
 function taskUrl(taskId: string) {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://chefnanawilmot.com'
+  const base = SITE_URL
   return `${base}/admin/tasks/${taskId}`
 }
 

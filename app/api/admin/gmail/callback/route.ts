@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getGmailAccessToken, getGmailHistoryId } from '@/lib/gmail'
+import { SITE_URL } from '@/lib/site-url'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -8,12 +9,12 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
 
   if (error || !code) {
-    return NextResponse.redirect(new URL('/admin/settings?gmailError=denied', 'https://www.chefnanawilmot.com'))
+    return NextResponse.redirect(new URL('/admin/settings?gmailError=denied', SITE_URL))
   }
 
   const clientId = process.env.GMAIL_CLIENT_ID!
   const clientSecret = process.env.GMAIL_CLIENT_SECRET!
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.chefnanawilmot.com'}/api/admin/gmail/callback`
+  const redirectUri = `${SITE_URL}/api/admin/gmail/callback`
 
   // Exchange code for tokens
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -32,11 +33,11 @@ export async function GET(request: NextRequest) {
 
   if (!tokenRes.ok || tokens.error) {
     const msg = encodeURIComponent(tokens.error_description ?? tokens.error ?? 'token_exchange_failed')
-    return NextResponse.redirect(new URL(`/admin/settings?gmailError=${msg}`, 'https://www.chefnanawilmot.com'))
+    return NextResponse.redirect(new URL(`/admin/settings?gmailError=${msg}`, SITE_URL))
   }
 
   if (!tokens.refresh_token) {
-    return NextResponse.redirect(new URL('/admin/settings?gmailError=no_refresh_token', 'https://www.chefnanawilmot.com'))
+    return NextResponse.redirect(new URL('/admin/settings?gmailError=no_refresh_token', SITE_URL))
   }
 
   // Get initial history ID so we don't process old messages
@@ -55,5 +56,5 @@ export async function GET(request: NextRequest) {
     })
     .neq('id', '00000000-0000-0000-0000-000000000000')
 
-  return NextResponse.redirect(new URL('/admin/settings?gmailConnected=1', 'https://www.chefnanawilmot.com'))
+  return NextResponse.redirect(new URL('/admin/settings?gmailConnected=1', SITE_URL))
 }

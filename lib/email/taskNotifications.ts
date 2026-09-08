@@ -1,5 +1,6 @@
 import { getResend } from '@/lib/resend'
 import { createServiceClient } from '@/lib/supabase/server'
+import { SITE_URL } from '@/lib/site-url'
 
 interface TaskEmailContext {
   taskId: string
@@ -17,7 +18,7 @@ async function getSendingDomain(supabase: Awaited<ReturnType<typeof createServic
 }
 
 function taskUrl(taskId: string) {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://chefnanawilmot.com'
+  const base = SITE_URL
   return `${base}/admin/tasks/${taskId}`
 }
 
