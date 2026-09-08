@@ -4,6 +4,10 @@
 // or on a schedule later if it proves useful.
 //
 // Usage: node --env-file=.env.local scripts/reconcile-stripe-sessions.mjs
+//
+// NOTE: /api/cron/reconcile-tickets now does this on a schedule and also
+// sends the ticket email via the shared fulfillment path. Prefer that; this
+// script stays as a local/offline escape hatch.
 
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
@@ -51,13 +55,18 @@ async function main() {
 
     const nameField = session.custom_fields?.find(f => f.key === 'attendee_name')
     const name = nameField?.text?.value || email
+    // Read the ordered quantity rather than assuming one seat — the seat
+    // selector sells up to MAX_TICKETS_PER_ORDER, so hardcoding 1 here
+    // under-counted multi-seat orders and left the event looking emptier
+    // than it was.
+    const qty = Number(session.metadata?.quantity) || 1
 
     const { data, error } = await supabase.rpc('fulfill_checkout', {
       p_event: eventId,
       p_session: session.id,
       p_name: name,
       p_email: email,
-      p_qty: 1,
+      p_qty: qty,
       p_qr: generateQrToken(),
     })
 

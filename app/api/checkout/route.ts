@@ -14,11 +14,17 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createServiceClient()
 
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', eventId)
-    .single()
+  // Both reads depend only on eventId, so they go together — run serially
+  // this sat on the critical path of the embedded form appearing, and the
+  // seat count was waiting on a row it never needed.
+  const [{ data: event }, { data: sold }] = await Promise.all([
+    supabase
+      .from('events')
+      .select('slug, title, status, capacity, currency, price_cents')
+      .eq('id', eventId)
+      .single(),
+    supabase.rpc('seats_sold', { p_event: eventId }),
+  ])
 
   if (!event || event.status !== 'published') {
     return NextResponse.json({ error: 'unavailable' }, { status: 400 })
@@ -29,7 +35,6 @@ export async function POST(req: NextRequest) {
   // which the webhook calls after payment succeeds. Never reveal how much
   // room is actually left — same generic response whether it's 0 seats or
   // just not enough for this quantity.
-  const { data: sold } = await supabase.rpc('seats_sold', { p_event: eventId })
   if ((sold ?? 0) + quantity > event.capacity) {
     return NextResponse.json({ error: 'unavailable' }, { status: 409 })
   }

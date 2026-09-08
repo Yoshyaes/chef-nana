@@ -87,6 +87,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
       <head>
+        {/* Stripe embedded checkout pulls from three origins after hydration.
+            Opening the TLS connections up front takes that handshake off the
+            critical path of the payment form appearing. */}
+        <link rel="preconnect" href="https://js.stripe.com" />
+        <link rel="preconnect" href="https://api.stripe.com" />
+        <link rel="dns-prefetch" href="https://m.stripe.network" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
