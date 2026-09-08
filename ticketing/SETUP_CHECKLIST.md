@@ -64,19 +64,46 @@ New files are all under `app/`, `components/`, `lib/`, `supabase/migrations/`, a
 1. Add to the Vercel project's environment variables (production, and preview if you want to test there too):
    - `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — start with **test mode** keys until you're ready for a real event, then swap to live keys.
    - `STRIPE_WEBHOOK_SECRET` — **this is a different value than your local one.** Create a new webhook endpoint in the Stripe dashboard pointing at `https://<your-domain>/api/stripe/webhook`, select the `checkout.session.completed` and `charge.refunded` events, and use the signing secret Stripe gives you for *that* endpoint.
+     - **Use the exact host Vercel treats as primary — `www` or apex, not whichever reads better.** Vercel 307-redirects every non-primary domain to the primary one, and Stripe does not follow redirects: it records the 307 as a failed delivery and moves on. The endpoint looks correctly configured in the dashboard, the events fire, and nothing is ever fulfilled. Verify before trusting it (see §7).
    - `CHECKIN_PASSCODE` — pick something door staff can type quickly but isn't trivially guessable (this is the entire security model for `/checkin` — see the note in the dev plan).
-   - `NEXT_PUBLIC_SITE_URL` — your real production domain (used to build the Stripe return URL).
+   - `NEXT_PUBLIC_SITE_URL` — your real production domain (used to build the Stripe return URL). Use the **same** host as the webhook endpoint above. A mismatch is survivable here, since the guest's browser follows the redirect after paying, but it means the return URL quietly depends on that redirect staying in place.
 2. Deploy.
 3. Repeat the smoke test from section 4 against the deployed URL before trusting it with a real event.
 
 ## 6. Before the first real event (going live)
 
 - [ ] **Switch Stripe to live mode** in Vercel env vars (`sk_live_...` / `pk_live_...`) and create a *second* live-mode webhook endpoint (test and live mode have separate webhook configs in Stripe) — get a new `STRIPE_WEBHOOK_SECRET` for it.
+- [ ] **Curl the live webhook URL and confirm it answers `400 missing signature`, not a 3xx** (§7). This is the single check that would have caught the first real sale going unrecorded.
 - [ ] Confirm the Bluevine business checking account is fully payout-verified in Stripe (Settings → Bank accounts and scheduling) — a real charge won't pay out until this is done.
 - [ ] Decide the real event's price and capacity (this build assumes a single GA price, qty 1 per order — tiers/multi-quantity are explicitly deferred).
 - [ ] Decide refund policy wording if you want something more specific than the generic "sold out, you weren't charged" apology copy already in `lib/resend.ts`'s `sendOverflowApologyEmail` — that copy only covers the auto-refund-on-overflow case, not a general returns policy.
 - [ ] Decide whether Tock (`components/sections/SupperClub.tsx:117`, `components/layout/Footer.tsx:125`, `app/layout.tsx:64`) stays live as a fallback for the first drop, or whether to cut over immediately. Recommendation from the dev plan: keep Tock live until the first native event sells cleanly, then swap the links.
 - [ ] Decide who runs `/checkin` at the door and on what device — the camera scanner needs camera permission and a decent connection; the name-search fallback works without a camera.
+
+## 7. Verifying the webhook actually lands
+
+Do this after any change to the domain, the endpoint URL, or the Vercel project's primary domain — not just at first setup.
+
+```
+curl -i -X POST https://<the-exact-url-in-stripe>/api/stripe/webhook
+```
+
+- **`400 {"error":"missing signature"}` — correct.** The request reached the route and was rejected for having no Stripe signature, which is exactly what an unsigned request should get.
+- **`307` / `308` — broken.** Read the `location` header: it names the host Vercel actually wants. Change the Stripe endpoint URL to that host. Stripe will not follow the redirect for you.
+- **`404`** — the route is not deployed on that domain.
+- **`401`** — deployment protection is on and Stripe cannot reach the app at all.
+
+Then confirm end to end in the Stripe dashboard under **Developers → Events**: find a recent `checkout.session.completed` and check its "Deliveries to webhook endpoints" panel reads `200`, not `307 ERR`.
+
+### What this cost the first time (Sep 2026)
+
+The first real sale, $180, took payment and recorded nothing. The counter read 0 of 24, no customer details were captured anywhere, and the buyer never received a ticket.
+
+The endpoint was registered, subscribed to the right events, and holding the right signing secret. It pointed at `chefnanawilmot.com`, while Vercel's primary domain was `www.chefnanawilmot.com`. Every delivery got a 307 and was dropped.
+
+Nothing surfaced this. The dashboard showed a healthy endpoint, the payment succeeded, and the only visible symptom was a seat counter that stayed at zero — easy to misread as "the counter is broken" rather than "no sale was ever recorded." Recovery was a one-field URL change plus **Resend** on the stranded event.
+
+`/api/cron/reconcile-tickets` now catches this class of failure on a daily schedule, so a missed webhook self-heals rather than silently costing a guest their ticket. It is a net, not a substitute: fix the endpoint so fulfilment stays immediate.
 
 ## Known limitations to be aware of (not bugs, just MVP scope)
 
@@ -84,4 +111,4 @@ New files are all under `app/`, `components/`, `lib/`, `supabase/migrations/`, a
 - No waitlist when sold out.
 - No promo codes.
 - `/checkin`'s passcode gate is a shared header value, not per-person login — fine for a small door team, not meant to scale past that without revisiting.
-- The reconcile script (`scripts/reconcile-stripe-sessions.mjs`) is manual — run it with `node --env-file=.env.local scripts/reconcile-stripe-sessions.mjs` if you ever suspect a webhook was missed. It's not on a schedule.
+- Reconciliation now runs daily at `/api/cron/reconcile-tickets` (see `vercel.json`), so a missed webhook self-heals within a day rather than silently. Change the schedule to `0 * * * *` for hourly if the plan allows. `scripts/reconcile-stripe-sessions.mjs` remains as an offline escape hatch: `node --env-file=.env.local scripts/reconcile-stripe-sessions.mjs`.
