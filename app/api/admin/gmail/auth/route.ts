@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/site-url'
 
 export async function GET() {
   const clientId = process.env.GMAIL_CLIENT_ID
@@ -6,7 +7,7 @@ export async function GET() {
     return NextResponse.json({ error: 'GMAIL_CLIENT_ID not configured' }, { status: 503 })
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.chefnanawilmot.com'}/api/admin/gmail/callback`
+  const redirectUri = `${SITE_URL}/api/admin/gmail/callback`
 
   const params = new URLSearchParams({
     client_id: clientId,
