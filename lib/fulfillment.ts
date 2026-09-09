@@ -36,6 +36,15 @@ export async function fulfillSession(session: Stripe.Checkout.Session): Promise<
 
   const supabase = await createServiceClient()
 
+  // Funnel record — payment succeeded regardless of what fulfill_checkout
+  // decides below (overflow still means the checkout itself completed).
+  // Runs here rather than in the webhook route so a reconcile-cron backfill
+  // updates it too.
+  await supabase
+    .from('checkout_sessions')
+    .update({ status: 'completed', completed_at: new Date().toISOString() })
+    .eq('stripe_session', session.id)
+
   const { data: event } = await supabase
     .from('events')
     .select('title, event_date, location')
