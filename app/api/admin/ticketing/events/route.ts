@@ -21,7 +21,24 @@ export async function GET() {
     soldByEvent.set(a.event_id, (soldByEvent.get(a.event_id) ?? 0) + a.quantity)
   }
 
-  const withSeats = (events ?? []).map(e => ({ ...e, seats_sold: soldByEvent.get(e.id) ?? 0 }))
+  const { data: checkoutSessions } = await supabase
+    .from('checkout_sessions')
+    .select('event_id, status')
+
+  const checkoutsByEvent = new Map<string, { started: number; completed: number }>()
+  for (const c of checkoutSessions ?? []) {
+    const entry = checkoutsByEvent.get(c.event_id) ?? { started: 0, completed: 0 }
+    entry.started++
+    if (c.status === 'completed') entry.completed++
+    checkoutsByEvent.set(c.event_id, entry)
+  }
+
+  const withSeats = (events ?? []).map(e => ({
+    ...e,
+    seats_sold: soldByEvent.get(e.id) ?? 0,
+    checkouts_started: checkoutsByEvent.get(e.id)?.started ?? 0,
+    checkouts_completed: checkoutsByEvent.get(e.id)?.completed ?? 0,
+  }))
 
   return NextResponse.json(withSeats)
 }

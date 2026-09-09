@@ -13,6 +13,8 @@ interface TicketEvent {
   capacity: number
   status: 'draft' | 'published' | 'sold_out' | 'closed'
   seats_sold: number
+  checkouts_started: number
+  checkouts_completed: number
 }
 
 type Draft = {
@@ -64,7 +66,7 @@ export default function TicketingPage() {
     })
     if (res.ok) {
       const created = await res.json()
-      setEvents(p => [...p, { ...created, seats_sold: 0 }])
+      setEvents(p => [...p, { ...created, seats_sold: 0, checkouts_started: 0, checkouts_completed: 0 }])
       setCreating(false)
       setDraft(EMPTY)
     }
@@ -146,6 +148,12 @@ export default function TicketingPage() {
                 <div style={{ fontWeight: 500, color: 'var(--brown)', fontSize: 14 }}>{ev.title}</div>
                 <div style={{ fontSize: 12, color: '#9a7d5a', marginTop: 2 }}>
                   {new Date(ev.event_date).toLocaleDateString()} · {ev.location} · {ev.seats_sold}/{ev.capacity} seats
+                </div>
+                <div style={{ fontSize: 12, color: '#9a7d5a', marginTop: 2 }}>
+                  {ev.checkouts_started} checkout{ev.checkouts_started === 1 ? '' : 's'} started · {ev.checkouts_completed} completed
+                  {ev.checkouts_started > ev.checkouts_completed && (
+                    <span style={{ color: '#B85A35' }}> · {ev.checkouts_started - ev.checkouts_completed} abandoned</span>
+                  )}
                 </div>
               </div>
               <StatusBadge status={ev.status} />

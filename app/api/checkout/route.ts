@@ -71,5 +71,15 @@ export async function POST(req: NextRequest) {
     return_url: `${siteUrl}/events/${event.slug}/confirmed?session_id={CHECKOUT_SESSION_ID}`,
   })
 
+  // Funnel record — lets the admin see checkout starts vs. completions
+  // (attendees only ever records the latter). Best-effort: a failure here
+  // shouldn't block the guest from checking out.
+  const { error: insertError } = await supabase
+    .from('checkout_sessions')
+    .insert({ stripe_session: session.id, event_id: eventId, quantity })
+  if (insertError) {
+    console.error('checkout_sessions insert failed', session.id, insertError)
+  }
+
   return NextResponse.json({ clientSecret: session.client_secret })
 }
