@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { MAX_TICKETS_PER_ORDER } from '@/lib/ticketing'
+import { isLikelyBot } from '@/lib/bot-detection'
 
 export async function POST(req: NextRequest) {
+  // The checkout widget mounts on page load (not on click), so a crawler or
+  // link-preview bot that executes JS was spinning up a real Stripe session
+  // per visit. No real guest's browser fails this check.
+  if (isLikelyBot(req.headers.get('user-agent'))) {
+    return NextResponse.json({ error: 'unavailable' }, { status: 400 })
+  }
+
   const { eventId, quantity = 1 } = await req.json()
   if (!eventId) {
     return NextResponse.json({ error: 'eventId is required' }, { status: 400 })
