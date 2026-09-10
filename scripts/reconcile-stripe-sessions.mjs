@@ -29,11 +29,20 @@ function generateQrToken() {
   return randomBytes(16).toString('hex')
 }
 
-async function main() {
-  const sessions = await stripe.checkout.sessions.list({ limit: 100 })
+// Matches /api/cron/reconcile-tickets: a flat limit: 100 only sees the most
+// recently created sessions, which an unrelated traffic burst can push a
+// real payment out of entirely. Page back through a bounded window instead.
+const LOOKBACK_DAYS = 45
+const MAX_SESSIONS = 2000
 
-  const completed = sessions.data.filter(s => s.status === 'complete' && s.payment_status === 'paid')
-  console.log(`Checked ${sessions.data.length} recent sessions, ${completed.length} completed.`)
+async function main() {
+  const sinceTimestamp = Math.floor(Date.now() / 1000) - LOOKBACK_DAYS * 24 * 60 * 60
+  const sessions = await stripe.checkout.sessions
+    .list({ limit: 100, created: { gte: sinceTimestamp } })
+    .autoPagingToArray({ limit: MAX_SESSIONS })
+
+  const completed = sessions.filter(s => s.status === 'complete' && s.payment_status === 'paid')
+  console.log(`Checked ${sessions.length} sessions from the last ${LOOKBACK_DAYS} days, ${completed.length} completed.`)
 
   let backfilled = 0
 

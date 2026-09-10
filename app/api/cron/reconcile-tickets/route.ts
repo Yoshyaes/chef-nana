@@ -18,6 +18,15 @@ import { fulfillSession, type FulfillResult } from '@/lib/fulfillment'
 
 export const maxDuration = 60
 
+// A flat `limit: 100` only sees the 100 most-recently-created sessions —
+// fine when volume is low, but a burst of unrelated traffic (a bot flood
+// creating hundreds of sessions in a day, since fixed, is exactly what
+// happened here) pushes a real payment from days ago out of that window
+// entirely, silently defeating the one job that exists to catch missed
+// payments. Page back through everything in a bounded window instead.
+const RECONCILE_LOOKBACK_DAYS = 45
+const RECONCILE_MAX_SESSIONS = 2000
+
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   const auth = req.headers.get('authorization')
@@ -25,11 +34,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const sessions = await getStripe().checkout.sessions.list({ limit: 100 })
-  const paid = sessions.data.filter(s => s.status === 'complete' && s.payment_status === 'paid')
+  const sinceTimestamp = Math.floor(Date.now() / 1000) - RECONCILE_LOOKBACK_DAYS * 24 * 60 * 60
+  const sessions = await getStripe()
+    .checkout.sessions.list({ limit: 100, created: { gte: sinceTimestamp } })
+    .autoPagingToArray({ limit: RECONCILE_MAX_SESSIONS })
+  const paid = sessions.filter(s => s.status === 'complete' && s.payment_status === 'paid')
 
   if (paid.length === 0) {
-    return NextResponse.json({ checked: sessions.data.length, paid: 0, backfilled: 0 })
+    return NextResponse.json({ checked: sessions.length, paid: 0, backfilled: 0 })
   }
 
   // One query for the whole batch rather than a round trip per session.
@@ -61,7 +73,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    checked: sessions.data.length,
+    checked: sessions.length,
     paid: paid.length,
     missing: missing.length,
     backfilled,
