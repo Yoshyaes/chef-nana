@@ -54,8 +54,10 @@ export async function POST(req: NextRequest) {
 
     // Same audience as the general newsletter signup — this both adds the
     // waitlist signup to the newsletter list and tags them for this event.
-    // Resend's create() 400s if the contact already exists in the audience,
-    // so fall back to update() to make sure the tag still lands.
+    // create() is an upsert by email: calling it again for an existing
+    // contact returns that contact rather than erroring, so no separate
+    // update() fallback is needed. `waitlist_tag` must exist as a Contact
+    // Property in the Resend dashboard first, or this 422s.
     const created = await resend.contacts.create({
       audienceId: RESEND_AUDIENCE_ID,
       email,
@@ -63,11 +65,11 @@ export async function POST(req: NextRequest) {
     })
 
     if (created.error) {
-      await resend.contacts.update({
-        audienceId: RESEND_AUDIENCE_ID,
-        email,
-        properties: { waitlist_tag: tag },
-      })
+      console.error('waitlist contacts.create failed', created.error)
+      return NextResponse.json(
+        { success: false, message: 'Something went wrong. Please try again.' },
+        { status: 502 }
+      )
     }
 
     return NextResponse.json({ success: true })
