@@ -5,7 +5,29 @@ import WaitlistForm from '@/components/ui/WaitlistForm'
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const event = await getEventByWaitlistSlug(slug).catch(() => null)
-  return { title: event ? `Join the Waitlist — ${event.title} | Chef Nana Araba` : 'Join the Waitlist | Chef Nana Araba' }
+
+  if (!event) {
+    return { title: 'Join the Waitlist | Chef Nana Araba' }
+  }
+
+  const title = `Join the Waitlist — ${event.title} | Chef Nana Araba`
+  const description = event.detail || "Join the waitlist and we'll email you the moment tickets go live."
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Chef Nana Araba Wilmot' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og-image.jpg'],
+    },
+  }
 }
 
 export default async function WaitlistPage({ params }: { params: Promise<{ slug: string }> }) {
