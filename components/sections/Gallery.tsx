@@ -41,7 +41,7 @@ interface GalleryProps {
 
 export default function Gallery({ galleryImages }: GalleryProps) {
   const cells: GalleryCell[] = galleryImages?.length
-    ? galleryImages.map((img) => ({
+    ? galleryImages.slice(0, 5).map((img) => ({
         caption: img.caption || '',
         image: {
           src: urlFor(img.image as Parameters<typeof urlFor>[0]).width(800).url(),

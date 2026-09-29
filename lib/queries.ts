@@ -3,8 +3,20 @@ import { client } from './sanity'
 export async function getEvents() {
   if (!client) return null
   return client.fetch<
-    { date: string; location?: string; title: string; price?: string; ticketUrl?: string; detail?: string }[]
-  >(`*[_type == "event"] | order(order asc) { date, location, title, price, ticketUrl, detail }`)
+    {
+      date: string
+      location?: string
+      title: string
+      price?: string
+      ticketUrl?: string
+      detail?: string
+      ctaType?: 'tickets' | 'donate' | 'waitlist'
+      donateUrl?: string
+      waitlistEventSlug?: string
+    }[]
+  >(
+    `*[_type == "event"] | order(order asc) { date, location, title, price, ticketUrl, detail, ctaType, donateUrl, waitlistEventSlug }`
+  )
 }
 
 export async function getServices() {

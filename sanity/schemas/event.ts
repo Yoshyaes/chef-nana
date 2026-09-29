@@ -35,7 +35,37 @@ export default defineType({
       title: 'Get Tickets Link',
       type: 'string',
       description:
-        'Where "Get Tickets" sends guests. Either a full external URL (a partner venue\'s own ticketing page) or an internal path to a native event page (e.g. "/events/bem-books-sep-9"). Leave blank to hide the ticket link for this row.',
+        'Where "Get Tickets" sends guests. Either a full external URL (a partner venue\'s own ticketing page) or an internal path to a native event page (e.g. "/events/bem-books-sep-9"). Leave blank to hide the ticket link for this row. Only used when CTA Type is "Get Tickets".',
+      hidden: ({ parent }) => parent?.ctaType && parent.ctaType !== 'tickets',
+    }),
+    defineField({
+      name: 'ctaType',
+      title: 'CTA Type',
+      type: 'string',
+      description: 'Which button this row shows on the right.',
+      options: {
+        list: [
+          { title: 'Get Tickets', value: 'tickets' },
+          { title: 'Donate', value: 'donate' },
+          { title: 'Join Waitlist', value: 'waitlist' },
+        ],
+      },
+      initialValue: 'tickets',
+    }),
+    defineField({
+      name: 'donateUrl',
+      title: 'Donate Link',
+      type: 'string',
+      description: 'External URL the "Donate" button sends guests to. Only used when CTA Type is "Donate".',
+      hidden: ({ parent }) => parent?.ctaType !== 'donate',
+    }),
+    defineField({
+      name: 'waitlistEventSlug',
+      title: 'Waitlist Event Slug',
+      type: 'string',
+      description:
+        'Identifies this event to the waitlist signup form (e.g. "nov-13-popup"). Only used when CTA Type is "Join Waitlist".',
+      hidden: ({ parent }) => parent?.ctaType !== 'waitlist',
     }),
     defineField({
       name: 'detail',

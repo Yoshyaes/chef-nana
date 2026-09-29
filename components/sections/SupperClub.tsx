@@ -50,7 +50,19 @@ const images = [
 const defaultDescription = `An intimate supper club series celebrating the foodways of West Africa and beyond reimagined through a fine-dining lens and served around a communal table. Each dinner is a four to five course journey through history, memory, and flavor.`
 
 interface SupperClubProps {
-  events?: { date: string; location?: string; title: string; price?: string; ticketUrl?: string; detail?: string }[] | null
+  events?:
+    | {
+        date: string
+        location?: string
+        title: string
+        price?: string
+        ticketUrl?: string
+        detail?: string
+        ctaType?: 'tickets' | 'donate' | 'waitlist'
+        donateUrl?: string
+        waitlistEventSlug?: string
+      }[]
+    | null
   siteSettings?: { supperClubDescription?: string } | null
 }
 
@@ -187,7 +199,7 @@ export default function SupperClub({ events: cmsEvents, siteSettings }: SupperCl
           }}
         >
           {events.map((event) => (
-            <EventCard key={event.date} {...event} />
+            <EventCard key={`${event.date}-${event.title}`} {...event} />
           ))}
         </div>
       </div>
