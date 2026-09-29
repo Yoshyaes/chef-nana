@@ -86,6 +86,41 @@ export async function sendOverflowApologyEmail({ to, name, eventTitle }: Overflo
   })
 }
 
+interface WaitlistConfirmationParams {
+  to: string
+  eventTitle: string
+  eventDate: string
+  location: string | null
+}
+
+export async function sendWaitlistConfirmationEmail({ to, eventTitle, eventDate, location }: WaitlistConfirmationParams) {
+  const sendingDomain = await getSendingDomain()
+
+  try {
+    await getResend().emails.send({
+      from: `Chef Nana <hello@${sendingDomain}>`,
+      to,
+      subject: `You're on the waitlist — ${eventTitle}`,
+      html: `
+        <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #2C1A0E;">
+          <h1 style="font-weight: 400; font-size: 24px;">You're on the list.</h1>
+          <p style="font-size: 15px; line-height: 1.7; color: #5C3A22;">
+            ${eventTitle}<br />
+            ${eventDate}${location ? ` · ${location}` : ''}
+          </p>
+          <p style="font-size: 15px; line-height: 1.7; color: #5C3A22;">
+            We'll email you the moment tickets go live.
+          </p>
+        </div>
+      `,
+    })
+  } catch (err) {
+    // Best-effort — the person is already saved to the waitlist by this
+    // point, so a transient Resend error here shouldn't read as a failure.
+    console.error('sendWaitlistConfirmationEmail failed', to, err)
+  }
+}
+
 interface UpsertContactParams {
   email: string
   name: string

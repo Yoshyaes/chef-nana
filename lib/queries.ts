@@ -19,6 +19,14 @@ export async function getEvents() {
   )
 }
 
+export async function getEventByWaitlistSlug(slug: string) {
+  if (!client) return null
+  return client.fetch<{ title: string; date: string; location?: string } | null>(
+    `*[_type == "event" && waitlistEventSlug == $slug][0] { title, date, location }`,
+    { slug }
+  )
+}
+
 export async function getServices() {
   if (!client) return null
   return client.fetch<

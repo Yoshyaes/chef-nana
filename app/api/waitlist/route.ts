@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { isLikelyBot } from '@/lib/bot-detection'
+import { getEventByWaitlistSlug } from '@/lib/queries'
+import { sendWaitlistConfirmationEmail } from '@/lib/resend'
 
 const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID
 
@@ -70,6 +72,18 @@ export async function POST(req: NextRequest) {
         { success: false, message: 'Something went wrong. Please try again.' },
         { status: 502 }
       )
+    }
+
+    // Best-effort — the signup already succeeded above regardless of
+    // whether the confirmation email sends.
+    const event = await getEventByWaitlistSlug(eventSlug).catch(() => null)
+    if (event) {
+      await sendWaitlistConfirmationEmail({
+        to: email,
+        eventTitle: event.title,
+        eventDate: event.date,
+        location: event.location ?? null,
+      })
     }
 
     return NextResponse.json({ success: true })
